@@ -68,7 +68,7 @@ int jogada = 0;
 int pontoJ1 = 0;
 int pontoJ2 = 0;
 
-int RotC1 = -30, RotC2 = -30,RotyC1 = 0, RotyC2 = 0, movimento=1, xmovimento=1, xposition = 0;
+int RotC1 = -30, RotC2 = -30,RotyC1 = 0, RotyC2 = 0, movimento=0, xmovimento=1, xposition = 0;
 float r = 0, l=0, eyex=1.0, eyey=1.0 ,eyez=1.0, lookx=1.0, looky=1.0 ,lookz=1.0,elx=0,ely=0.0,elz=0, delta_moveCB=1.0,delta_moveFT=1.0,delta_angle=0.0, angle=0.0;
 bool cam_x=false,cam_z=false;
 int teta_tankVermelho = 30; //graus
@@ -140,36 +140,7 @@ void retangulos()
     //face 6 baixo Bottom
     desenha(v2,v3,v6,v7);
 }
-void Prisma(){
-    float c=tx/8.5, l = ty*2, p =tx/8.5;
-    float v1[3] ={-c, l,  p};
-    float v2[3] ={-c, 0,  p};
-    float v3[3] ={ c, 0,  p};
-    float v4[3] ={ c, l,  p};
 
-    float v5[3] ={ c, l,-p};
-    float v6[3] ={ c, 0,-p};
-    float v7[3] ={-c, 0,-p};
-    float v8[3] ={-c, l,-p};
-
-    //face 1 Frente
-    desenha(v1,v2,v3,v4);
-
-    //face 2 Direita R
-    desenha(v3,v4,v5,v6);
-
-    // face 3 traz Back
-    desenha(v5,v6,v7,v8);
-
-    //face 4 Esquerda L
-    desenha(v1,v2,v7,v8);
-
-    //face 5 topo top
-    desenha(v1,v4,v5,v8);
-
-    //face 6 baixo Bottom
-    desenha(v2,v3,v6,v7);
-}
 
 void canhao(){
     float c=tx/8.5, l = ty*2, p =tx/8.5;
@@ -202,6 +173,145 @@ void canhao(){
     glColor3f(0.5, 0.5, 0.5);
     desenha(v1,v4,v5,v8);
 }
+void canhao3D(float r, float h){
+  float teta2 = 0.0f;
+  float raio = r+0.1;
+  float angulo = 0;
+  glColor3fv(cinza);
+    glBegin(GL_POLYGON);
+    while(teta2 < 360.0)
+    {
+      glVertex3f(r*(-sin(teta2/180.0 * PI)),0,r*cos(teta2/180.0 * PI));
+      teta2 += 0.1;
+    }
+  glEnd();
+  glBegin(GL_LINE_LOOP);
+  raio = r;
+  angulo = 0;
+  teta2= 0.0;
+  while(teta2 < 360.0)
+    {
+      glColor3fv(preto);
+      angulo = teta2;
+      glVertex3f((cos(angulo) * raio),0,(sin(angulo) * raio));
+      glVertex3f((cos(angulo) * raio),h,(sin(angulo) * raio));
+      teta2 +=0.1;
+      glVertex3f((cos(angulo) * raio),h,(sin(angulo) * raio));
+      glVertex3f((cos(angulo) * raio),0,(sin(angulo) * raio));
+      teta2 +=0.1;
+    }
+
+  glEnd();
+
+  glColor3fv(cinza);
+  teta2= 0.0;
+  glBegin(GL_POLYGON);
+    while(teta2 < 360.0)
+    {
+      glVertex3f(r*sin(teta2/180.0 * PI),h,r*cos(teta2/180.0 * PI));
+      teta2 += 0.1;
+    }
+  glEnd();
+}
+void cilindro3D(float r, float h){
+  float teta2 = 0.0f;
+  float raio = r+0.1;
+  float angulo = 0;
+  glColor3fv(preto);
+    glBegin(GL_POLYGON);
+    while(teta2 < 360.0)
+    {
+      glVertex3f(r*cos(teta2/180.0 * PI),r*sin(teta2/180.0 * PI),h);
+      teta2 += 0.1;
+    }
+  glEnd();
+  glBegin(GL_LINE_LOOP);
+  raio = r;
+  angulo = 0;
+  teta2= 0.0;
+  while(teta2 < 360.0)
+    {
+      glColor3fv(preto);
+      angulo = teta2;
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),h);
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),-h);
+      teta2 +=0.1;
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),-h);
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),h);
+      teta2 +=0.1;
+    }
+
+  glEnd();
+
+  glColor3fv(preto);
+  teta2= 0.0;
+  glBegin(GL_POLYGON);
+    while(teta2 < 360.0)
+    {
+      glVertex3f(r*cos(teta2/180.0 * PI),r*sin(teta2/180.0 * PI),-h);
+      teta2 += 0.1;
+    }
+  glEnd();
+
+}
+
+void Rodas3D(float r, float h){
+  float teta2 = 0.0f;
+  glColor3fv(cinza);
+    glBegin(GL_POLYGON);
+    while(teta2 < 360.0)
+    {
+      glVertex3f(r*cos(teta2/180.0 * PI),r*sin(teta2/180.0 * PI),h-0.02);
+      teta2 += 0.1;
+    }
+  glEnd();
+
+  glBegin(GL_LINE_LOOP);
+  float raio = r+0.1;
+  float angulo = 0;
+  teta2= 0.0;
+  while(teta2 < 360.0)
+    {
+      glColor3fv(preto); //cor preto
+      angulo = teta2;
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),h);
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),-h);
+      teta2 +=1.0;
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),-h);
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),h);
+      teta2 +=1.0;
+    }
+
+  glEnd();
+  glBegin(GL_LINE_LOOP);
+  raio = r;
+  angulo = 0;
+  teta2= 0.0;
+  while(teta2 < 360.0)
+    {
+      glColor3fv(azul_ceu);
+      angulo = teta2;
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),h);
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),-h);
+      teta2 +=0.1;
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),-h);
+      glVertex3f((cos(angulo) * raio),(sin(angulo) * raio),h);
+      teta2 +=0.1;
+    }
+
+  glEnd();
+
+  glColor3fv(cinza);
+  teta2= 0.0;
+  glBegin(GL_POLYGON);
+    while(teta2 < 360.0)
+    {
+      glVertex3f(r*cos(teta2/180.0 * PI),r*sin(teta2/180.0 * PI),-h+0.02);
+      teta2 += 0.1;
+    }
+  glEnd();
+  
+}
 
 void triangulo()
 {
@@ -232,7 +342,6 @@ void quickboxCar(float altura, float largura)
     glVertex2f((largura), 0.5);
   glEnd();
 }
-
 
 void circulos()
 {
@@ -265,6 +374,353 @@ void circulos()
   glEnd();
 
 
+}
+void janela()
+{
+  float v1[3] = {-0.5, 0.5, 0.0};
+  float v2[3] = {-0.5, -0.5, 0.0};
+  float v3[3] = {0.5, -0.5, 0.0};
+  float v4[3] = {0.5, 0.5, 0.0};
+
+  glBegin(GL_QUADS);
+      glVertex3fv(v1);
+      glVertex3fv(v2);
+      glVertex3fv(v3);
+      glVertex3fv(v4);
+  glEnd();
+}
+
+int janelas(float tamPredioX, float tamPredioY, float tamJanela)
+{
+
+  if(tamJanela > tamPredioX)
+  {
+    return 1;
+  }
+
+  int imax, jmax;
+  float translatex = 0.25 * tamJanela;
+  float translatey = 0.25 * tamJanela;
+  int j = 0;
+
+  imax = (int) tamPredioY / ( (1.0 + 2 * translatey) * tamJanela);
+  //jmax = (int) (tamPredioX - 0.3*tamJanela ) / (1.2 * tamJanela);
+
+  printf("imax %d\n", imax );
+  //printf("jmax %d\n",jmax );
+
+  glTranslatef(0.0, (tamPredioY - tamJanela)/2.0, 0.0);
+  //glTranslatef(0.3 * tamJanela, 0.0, 0.0);
+
+  for(int i = 0; i < imax; i++)
+  {
+    printf("i %d\n", i );
+    glTranslatef(0.0, -translatey, 0.0);
+
+    glPushMatrix();
+    while(true)
+    {
+      if((1.0 * j * (translatex + tamJanela) + tamJanela/2.0) > tamPredioX/2.0)
+      {
+        //printf("j %d \n", j);
+        //printf("calc %f\n", 1.0 * j * (translatex + tamJanela) + tamJanela/2.0);
+        break;
+      }
+
+      glPushMatrix();
+        glTranslatef( 1.0 * j * (translatex + tamJanela), 0.0, 0.0);
+        glScalef(tamJanela, tamJanela, 1.0);
+        janela();
+      glPopMatrix();
+
+      glPushMatrix();
+        printf("i %d\n",i );
+        glTranslatef( -1.0 * j * (translatex + tamJanela), 0.0, 0.0);
+        glScalef(tamJanela, tamJanela, 1.0);
+        janela();
+      glPopMatrix();
+
+      j++;
+    }
+    glPopMatrix();
+    j = 0;
+    glTranslatef(0.0, -1.0 * tamJanela, 0.0);
+  }
+
+  return 0;
+}
+
+void janelasPredio(float tamPredioX, float tamPredioY, float tamPredioZ, float tamJanela)
+{
+    glPushMatrix();
+      glTranslatef(0.0, 0.0,  tamPredioZ/2.0 + 0.01);
+      janelas(tamPredioX, tamPredioY, tamJanela);
+    glPopMatrix();
+
+    glPushMatrix();
+      glTranslatef(0.0, 0.0,  -(tamPredioZ/2.0 + 0.01));
+      janelas(tamPredioX, tamPredioY, tamJanela);
+    glPopMatrix();
+
+}
+
+void faceCubo(float p1[3],float p2[3],float p3[3],float p4[3])
+{
+  glColor3f(0.8,0.0,0.0);
+  glBegin(GL_QUADS);
+      glVertex3fv(p1);
+      glVertex3fv(p2);
+      glVertex3fv(p3);
+      glVertex3fv(p4);
+  glEnd();
+}
+
+void arestaCubo(float p1[3],float p2[3],float p3[3],float p4[3])
+{
+  glColor3f(0.0,0.0,0.0);
+  glBegin(GL_LINE_LOOP);
+      glVertex3fv(p1);
+      glVertex3fv(p2);
+      glVertex3fv(p3);
+      glVertex3fv(p4);
+  glEnd();
+}
+
+void estruturaPredio()
+{
+  float v1[3] = {-0.5, 0.5, 0.5};
+  float v2[3] = {-0.5, -0.5, 0.5};
+  float v3[3] = {0.5, -0.5, 0.5};
+  float v4[3] = {0.5, 0.5, 0.5};
+
+  glPushMatrix();
+
+    faceCubo(v1, v2, v3, v4);
+    arestaCubo(v1, v2, v3, v4);
+
+    glRotatef(90, 0.0, 1.0, 0.0);
+    faceCubo(v1, v2, v3, v4);
+    arestaCubo(v1, v2, v3, v4);
+
+    glRotatef(90, 0.0, 1.0, 0.0);
+    faceCubo(v1, v2, v3, v4);
+    arestaCubo(v1, v2, v3, v4);
+
+    glRotatef(90, 0.0, 1.0, 0.0);
+    faceCubo(v1, v2, v3, v4);
+    arestaCubo(v1, v2, v3, v4);
+
+  glPopMatrix();
+
+  glPushMatrix();
+
+    glRotatef(90, 1.0, 0.0, 0.0);
+    faceCubo(v1, v2, v3, v4);
+    arestaCubo(v1, v2, v3, v4);
+
+    glRotatef(180, 1.0, 0.0, 0.0);
+    faceCubo(v1, v2, v3, v4);
+    arestaCubo(v1, v2, v3, v4);
+
+  glPopMatrix();
+
+}
+
+void predio(float tamPredioX, float tamPredioY, float tamPredioZ, float tamJanela)
+{
+
+  glTranslatef(0, tamPredioY/2.0, 0.0);
+  glPushMatrix();
+    glScalef(tamPredioX, tamPredioY, tamPredioZ);
+    estruturaPredio();
+  glPopMatrix();
+
+  glColor3f(1.0,1.0,1.0);
+  glPushMatrix();
+    janelasPredio(tamPredioX, tamPredioY, tamPredioZ, tamJanela);
+  glPopMatrix();
+
+}
+
+void predeiosRetangulo()
+{
+    glPushMatrix();
+      predio(0.7,1.0,0.7, 0.2);
+    glPopMatrix();
+}
+
+void prediosLosango()
+{
+  glPushMatrix();
+    glScalef(1.0,1.0, 1.0);
+    glPushMatrix();
+      glTranslatef(0.0, 0.0, 0.5);
+      predio(1.0, 1.0, 0.2, 0.2);
+    glPopMatrix();
+
+    glPushMatrix();
+      glTranslatef(0.0, 0.0, -0.5);
+      predio(1.0, 1.0, 0.2, 0.2);
+    glPopMatrix();
+  glPopMatrix();
+
+  glPushMatrix();
+    glTranslatef(0.5, 0.0, 0.0);
+    glRotatef(90, 0.0, 1.0, 0.0);
+    glTranslatef(0.0, 0.0, -0.2);
+    predio(0.6, 1.0, 0.4, 0.2);
+  glPopMatrix();
+
+  glPushMatrix();
+    glTranslatef(-0.5, 0.0, 0.0);
+    glRotatef(90, 0.0, 1.0, 0.0);
+    glTranslatef(0.0, 0.0, 0.2);
+    predio(0.6, 1.0, 0.4, 0.2);
+  glPopMatrix();
+
+}
+
+void plano()
+{
+  float v1[3] = {-0.5, 0.0, -0.5};
+  float v2[3] = {-0.5, -0.0, 0.5};
+  float v3[3] = {0.5, -0.0, 0.5};
+  float v4[3] = {0.5, 0.0, -0.5};
+
+
+  glColor3f(0.36, 0.36, 0.36);
+  glBegin(GL_QUADS);
+      glVertex3fv(v1);
+      glVertex3fv(v2);
+      glVertex3fv(v3);
+      glVertex3fv(v4);
+  glEnd();
+}
+
+void quadrado1()
+{
+  glScalef(1.0, 1.0, 0.2);
+  plano();
+}
+
+void quadrados()
+{
+
+}
+
+void cubo()
+{
+  float v1[3] = {0.5, 0.5, -0.5};
+  float v2[3] = {0.5, 0.0, -0.5};
+  float v3[3] = {0.5, 0.0, 0.5};
+  float v4[3] = {0.5, 0.5, 0.5};
+
+  float v5[3] = {-0.5, 0.5, -0.5};
+  float v6[3] = {-0.5, 0.0, -0.5};
+  float v7[3] = {-0.5, 0.0, 0.5};
+  float v8[3] = {-0.5, 0.5, 0.5};
+
+
+  faceCubo(v1, v2, v3, v4);
+  arestaCubo(v1, v2, v3, v4);
+
+  faceCubo(v3, v4, v8, v7);
+  arestaCubo(v3, v4, v8, v7);
+
+  faceCubo(v8, v7, v6, v5);
+  arestaCubo(v8, v7, v6, v5);
+
+  faceCubo(v6, v5, v1, v2);
+  arestaCubo(v6, v5, v1, v2);
+
+  faceCubo(v2, v3, v7, v6);
+  arestaCubo(v2, v3, v7, v6);
+
+  faceCubo(v1, v4, v8, v5);
+  arestaCubo(v1, v4, v8, v5);
+
+}
+
+
+void cena()
+{
+  glTranslatef(0,0, -10);
+
+  glPushMatrix();
+      predio(4, 8, 2, 0.5);
+  glPopMatrix();
+
+
+  glPushMatrix();
+    glTranslatef(6, 0, 3);
+    glRotatef(180, 0.0, 1.0, 0.0);
+    predio(5, 5, 2.5, 0.5);
+  glPopMatrix();
+
+  glPushMatrix();
+    glTranslatef(0, 0, -7);
+
+    predio(5, 15, 2.5, 0.5);
+  glPopMatrix();
+
+
+  }
+
+void circulo()
+{
+  float v1[3] = {0.0, 0.0, 0.0};
+  float teta = 0.0f;
+      glBegin(GL_LINE_LOOP);
+      while(teta < 360.0)
+      {
+        v1[0] = cos(teta/180.0 * PI);
+        v1[2] =  sin(teta/180.0 * PI) ;
+        glVertex3fv(v1);
+        //glVertex2f(cos(teta/180.0 * PI),sin(teta/180.0 * PI));
+        teta += 0.1;
+      }
+    glEnd();
+}
+
+void quarteirao()
+{
+  glPushMatrix();
+    glPushMatrix();
+      glRotatef(45, 0.0,1.0, 0.0);
+      plano();
+      prediosLosango();
+    glPopMatrix();
+    glTranslatef(0.5, 0.0, 1.0);
+    glScalef(0.5, 1.0, 0.9);
+    plano();
+    predeiosRetangulo();
+  glPopMatrix();
+}
+
+void quarteiroes()
+{
+  glPushMatrix();
+  for(int i = 0; i < 5; i++)
+  {
+    glTranslatef(0.0, 0.0, -2.0);
+    quarteirao();
+  }
+  glPopMatrix();
+}
+
+void esboco()
+{
+    glPushMatrix();
+      glTranslatef(0, 0, 0);
+      circulo();
+    glPopMatrix();
+
+    glScalef(15.0, 17.0, 15.0);
+      glPushMatrix();
+        glRotatef(-90, 0.0, 1.0, 0.0);
+        quarteiroes();
+      glPopMatrix();
+   
 }
 /// trata texto
 void renderbitmap(float x, float y, void *font, char *string)
@@ -481,6 +937,7 @@ void tank_Vermelho()
   glutSolidSphere(1.5,20,20);
   cil = -30;
   glScaled(0.5, 0.5,  1);
+  //canhao3D(1,tx);
   while(cil <30){
     glRotatef(cil, 0, 0, 1);
     glColor3f(0.0, 0.0, 0.0); ////// preto
@@ -493,14 +950,8 @@ void tank_Vermelho()
   glTranslatef(-tx/10.5,1.6*ty+0.7, 0);
   glRotatef(RotC1, 0, 0, 1);
   glRotatef(RotyC1, 1, 0, 0);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 1, 0);
-    glColor3f(0.0, 0.0, 0.0); ////// preto
-    canhao();
-    cil+=1;
-  }
-  ///////////////////////////// boca canhÃ¯Â¿Â½o
+  canhao3D(0.8,2*ty);
+  /////////////////////////// boca canhÃ¯Â¿Â½o
   glColor3f(0.5, 0.5, 0.5);
   glTranslatef(0,ty*1.8,0);
   glutSolidSphere(0.8,20,20);
@@ -520,50 +971,36 @@ void tank_Vermelho()
   glPopMatrix();
   ////////////////////////////// rodas
   glPushMatrix();
+  glTranslatef(-0.35*tx, -(ty/4)+0.7,0.0);
+  cilindro3D(0.2,tz-0.02);
+  glPopMatrix();
+
+  glPushMatrix();
   glTranslatef(-0.35*tx, -(ty/4)+0.7,1.6);
-  glColor3f(0.0, 0.0, 0.0); ////   preto
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  Rodas3D(0.7,0.4);
   glPopMatrix();
 
   glPushMatrix();
   glTranslatef(-0.35*tx, -(ty/4)+0.7,-1.6);
-  glColor3f(0.0, 0.0, 0.0); ////   preto
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  glRotatef(180,0,1,0);
+  Rodas3D(0.7,0.4);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(0.35*tx, -(ty/4)+0.7,0.0);
+  cilindro3D(0.2,tz-0.02);
   glPopMatrix();
 
   glPushMatrix();
   glTranslatef(0.35 * tx, -(ty/4)+0.7, 1.6);
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  Rodas3D(0.7,0.4);
   glPopMatrix();
 
   glPushMatrix();
-  glTranslatef(0.35 * tx, -(ty/4)+0.7, -1.6);
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
 
+  glTranslatef(0.35 * tx, -(ty/4)+0.7, -1.6);
+  glRotatef(180,0,1,0);
+  Rodas3D(0.7,0.4);
   glPopMatrix();
 }
 
@@ -595,13 +1032,7 @@ glScaled(0.5, 0.5,  1);
   glTranslatef(-tx/10.5,1.6*ty+0.7, 0);
   glRotatef(RotC2, 0, 0, 1);
   glRotatef(RotyC2, 1, 0, 0);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 1, 0);
-    glColor3f(0.0, 0.0, 0.0); ////// preto
-    canhao();
-    cil+=1;
-  }
+  canhao3D(0.8,2*ty);
   ///////////////////////////// boca canhÃ¯Â¿Â½o
   glColor3f(0.5, 0.5, 0.5);
   glTranslatef(0,ty*1.8,0);
@@ -616,55 +1047,42 @@ glScaled(0.5, 0.5,  1);
   glPopMatrix();
   //////////////////////////// carroceria
   glPushMatrix();
-  glColor3fv(azul_claro); //// vermelho
+  glColor3fv(azul_claro); 
   glTranslatef(0,0.7,0);
   retangulos();
   glPopMatrix();
   ////////////////////////////// rodas
   glPushMatrix();
+  glTranslatef(-0.35*tx, -(ty/4)+0.7,0.0);
+  cilindro3D(0.2,tz-0.02);
+  glPopMatrix();
+
+  glPushMatrix();
   glTranslatef(-0.35*tx, -(ty/4)+0.7,1.6);
-  glColor3f(0.0, 0.0, 0.0); ////   preto
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  Rodas3D(0.7,0.4);
   glPopMatrix();
 
   glPushMatrix();
   glTranslatef(-0.35*tx, -(ty/4)+0.7,-1.6);
-  glColor3f(0.0, 0.0, 0.0); ////   preto
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  glRotatef(180,0,1,0);
+  Rodas3D(0.7,0.4);
+  glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(0.35*tx, -(ty/4)+0.7,0.0);
+  cilindro3D(0.2,tz-0.02);
   glPopMatrix();
 
   glPushMatrix();
   glTranslatef(0.35 * tx, -(ty/4)+0.7, 1.6);
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  Rodas3D(0.7,0.4);
   glPopMatrix();
 
   glPushMatrix();
+
   glTranslatef(0.35 * tx, -(ty/4)+0.7, -1.6);
-  glScaled(0.2, 0.2, 0.7);
-  cil = 0;
-  while(cil <90){
-    glRotatef(cil, 0, 0, 1);
-    Prisma();
-    cil+=1;
-  }
+  glRotatef(180,0,1,0);
+  Rodas3D(0.7,0.4);
   glPopMatrix();
   glRotatef(-180, 0, 1, 0); //////   rotaciona em y
 }
@@ -672,19 +1090,19 @@ glScaled(0.5, 0.5,  1);
 void chao(){
   glColor3fv(laranja);
   glBegin(GL_QUADS);
-  glVertex3f(-500,0.1,500);
-  glVertex3f(-500,-0.9,-500);
-  glVertex3f(500,-0.9,-500);
-  glVertex3f(500,0.1,500);
+  glVertex3f(-200,0.1,200);
+  glVertex3f(-200,-0.9,-200);
+  glVertex3f(200,-0.9,-200);
+  glVertex3f(200,0.1,200);
   glEnd();
 }
 void teto(){
   glColor3fv(azul_ceu);
   glBegin(GL_QUADS);
-  glVertex3f(-500,0.1,500);
-  glVertex3f(-500,-0.9,-500);
-  glVertex3f(500,-0.9,-500);
-  glVertex3f(500,0.1,500);
+  glVertex3f(-200,0.1,200);
+  glVertex3f(-200,-0.9,-200);
+  glVertex3f(200,-0.9,-200);
+  glVertex3f(200,0.1,200);
   glEnd();
 }
 //// desenha fundo
@@ -693,24 +1111,24 @@ static void Ceu(float altura, float largura)
 
   glBegin(GL_LINE_LOOP);
     glColor3fv(rosado);
-    glVertex3f(-500,-0.2,-500);
+    glVertex3f(-200,-0.2,-200);
     glColor3fv(azul_ceu);
-    glVertex3f(-500,  altura,-500);
+    glVertex3f(-200,  altura,-200);
     glColor3fv(azul_ceu);
-    glVertex3f(-500 + (2*largura), altura,-500);
+    glVertex3f(-200 + (2*largura), altura,-200);
     glColor3fv(rosado);
-    glVertex3f(-500 + (2*largura),-0.2,-500);
+    glVertex3f(-200 + (2*largura),-0.2,-200);
   glEnd();
 
   glBegin(GL_QUADS);
     glColor3fv(rosado);
-    glVertex3f(-500,-0.2,-500);
+    glVertex3f(-200,-0.2,-200);
     glColor3fv(azul_ceu);
-    glVertex3f(-500, altura,-500);
+    glVertex3f(-200, altura,-200);
     glColor3fv(azul_ceu);
-    glVertex3f(-500 + (2*largura), altura,-500);
+    glVertex3f(-200 + (2*largura), altura,-200);
     glColor3fv(rosado);
-    glVertex3f(-500 + (2*largura), -0.2,-500);
+    glVertex3f(-200 + (2*largura), -0.2,-200);
   glEnd();
 
 }
@@ -827,19 +1245,16 @@ static void muros()
   retangulo( 15 * HEIGHT_TIJOLO, 6.5 * WIDTH_TIJOLO);//
   glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
   pedacoMuro(15 , 6 , 1);
-
   glLoadIdentity();
   glTranslatef( (2.5 + 0.5 + 8 + 1.0)* WIDTH_TIJOLO, 9 *  HEIGHT_TIJOLO, 0.0 );
   retangulo( 5 * HEIGHT_TIJOLO, 8.5 * WIDTH_TIJOLO);///
   glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
   pedacoMuro(5 , 8 , 0);
-
   glLoadIdentity();
   glTranslatef( (2.5 + 0.5 + 8 + 1.0)* WIDTH_TIJOLO, (9 + 5) *  HEIGHT_TIJOLO, 0.0 );
   retangulo( 10 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);////
   glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
   pedacoMuro(10 , 2.0 , 1);
-
   glLoadIdentity();
   glTranslatef( (2.5 + 0.5 + 8 + 1.5 + 5)* WIDTH_TIJOLO, (9 + 5) *  HEIGHT_TIJOLO, 0.0 );
   retangulo( 10 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);
@@ -859,19 +1274,16 @@ void muros2()
   retangulo( 6 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);
   glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
   pedacoMuro(6 , 2.0 , 1);
-
   glLoadIdentity();
   glTranslatef(7.5 * WIDTH_TIJOLO, 9 *  HEIGHT_TIJOLO, 0.0 );
   retangulo( 15 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);
   glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
   pedacoMuro(15 , 2.5 , 1);
-
   glLoadIdentity();
   glTranslatef( 5 * WIDTH_TIJOLO, (9 + 15.0) *  HEIGHT_TIJOLO, 0.0 );
   retangulo( 5 * HEIGHT_TIJOLO, 7.5 * WIDTH_TIJOLO);
   glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
   pedacoMuro(5 , 7.5 , 0);
-
   glLoadIdentity();
   glTranslatef( 15 * WIDTH_TIJOLO, (9 + 15) *  HEIGHT_TIJOLO, 0.0 );
   retangulo( 5 * HEIGHT_TIJOLO, 5.5 * WIDTH_TIJOLO);
@@ -964,7 +1376,6 @@ void spawnCar2(){
     mapa = rand()%2;
     pontoJ1 = 0;
     pontoJ2 = 0;
-    zera_repos_camera();
     novoJogo = false;
   }
 
@@ -1031,8 +1442,9 @@ void transformacao(){
   glTranslatef(0,500,0);
   teto();
   glPopMatrix();
-    glPushMatrix();
-  tijolo();
+  glPushMatrix();
+  glColor3fv(cinza_escuro);
+  esboco();
   glPopMatrix();
 
 
@@ -1050,9 +1462,9 @@ void transformacao(){
 }
 void camera(void){
   if(delta_moveCB){
-    eyex+= delta_moveCB * lookx *0.1;
-    eyey+= delta_moveCB * looky *0.1;
-    eyez+= delta_moveCB * lookz *0.1;
+    eyex+= delta_moveCB * lookx *0.5;
+    eyey+= delta_moveCB * looky *0.5;
+    eyez+= delta_moveCB * lookz *0.5;
 
     elx = lookx + eyex;
     ely = 1.0;
@@ -1062,9 +1474,9 @@ void camera(void){
     glutPostRedisplay();
   }
   if(delta_moveFT){
-    eyex+= delta_moveFT * lookx *0.1;
+    eyex+= delta_moveFT * lookx *0.5;
     //eyey+= delta_moveFT * looky*0.1;
-    eyez+= delta_moveFT * lookz *0.1;
+    eyez+= delta_moveFT * lookz *0.5;
 
     elx = lookx + eyex;
     //ely = eyey;
@@ -1077,12 +1489,7 @@ void camera(void){
   //printf("eyex: %f\n eyey: %f\n eyez: %f\n lookx: %f\n looky: %f\n lookz: %f\n", eyex,eyey,eyez,lookx,looky,lookz);
 
 }
-void zera_repos_camera(){
 
-    glTranslated(0,-30,-60);
-
-
-}
 /* FunÃ¯Â¿Â½Ã¯Â¿Â½es projetadas para tratar as diferentes classes de eventos */
 void redimensiona(int w, int h)
 {
@@ -1304,9 +1711,7 @@ void mouseMove(int x, int y){
     lookz =  -sin(angle + delta_angle);
     elx = lookx + eyex;
     elz = lookz + eyez;
-    printf("Lx:%f\n",lookx);
 
-    printf("Lz:%f\n",lookz);
   }
 }
 
@@ -1343,11 +1748,3 @@ int main(int argc, char *argv[]){
   glutMainLoop();
     return 0;
 }
-
-
-
-
-
-
-
-
