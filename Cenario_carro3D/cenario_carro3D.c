@@ -20,7 +20,9 @@
 #define TAM_BARRA_X 5.0
 #define TAM_BARRA_Y 0.6
 
-void zera_repos_camera();
+void trajetoria(float teta,float V0);
+void redisplay(int value);
+static void balisticaBomba();
 
 float translate_slider = 0;
 float translate_slider2 = 0;
@@ -43,6 +45,7 @@ float translate_slider2_local_y;
 
 float X_bomba = 0;
 float Y_bomba = 0;
+float Z_bomba = 0;
 bool bomba = false;
 bool colisao = false;
 bool colisaoM = false;
@@ -54,31 +57,34 @@ int mapa = 0;
 int tcolisao = 0;
 int V01 = 30; //ms
 int V02 = 30; //ms
-float vetPCarM1[6][2];
-float vetPCarM2[4][2];
-float atualPcar1[2];
-float atualPcar2[2];
-float PColisao1[2];
-float PColisao2[2];
+float vetPCarM1[10][3];
+float vetPCarM2[4][3];
+float atualPcar1[3];
+float atualPcar2[3];
+float PColisao1[3];
+float PColisao2[3];
 float V0x;
 float V0y;
+float V0z;
 float g = 10; //gravidade
 float delta_tempo = 0;
 int jogada = 0;
 int pontoJ1 = 0;
 int pontoJ2 = 0;
+bool mudarJogador = false;
 
-int RotC1 = -30, RotC2 = -30,RotyC1 = 0, RotyC2 = 0, movimento=0, xmovimento=1, xposition = 0;
-float r = 0, l=0, eyex=1.0, eyey=1.0 ,eyez=1.0, lookx=1.0, looky=1.0 ,lookz=1.0,elx=0,ely=0.0,elz=0, delta_moveCB=1.0,delta_moveFT=1.0,delta_angle=0.0, angle=0.0;
-bool cam_x=false,cam_z=false;
-int teta_tankVermelho = 30; //graus
-int teta_tankAzul = 150;
-
+int RotC1 = 0, RotC2 = 0,RotyC1 = 0, RotyC2 = 0, movimento=0, xmovimento=1, xposition = 0;
+float r = 0, l=0, eyex=1.0, eyey=1.0 ,eyez=1.0, lookx=1.0, looky=1.0 ,lookz=1.0,elx=0,ely=0.0,elz=0, delta_moveCB=1.0,delta_moveFT=1.0,delta_angle=0.0;// angle=0.0;
+float cam_x0=0, cam_y0=-130,cam_z0=0,Cam_xat=30,Cam_yat=-180,Cam_zat=-25,Rcam_x0=0, Rcam_y0=30,Rcam_z0=0,Rcam_xat=0,Rcam_yat=0,Rcam_zat=-90;
+int teta_tankVermelho = 0; //graus
+int teta_tankAzul = 0;
+int Cam = 1;
 
 typedef float color[3];
 
 color vermelho = { 0.85, 0.12, 0.0 };
 color verde = { 0.0, 1.0, 0.0 };
+color verde_escuro = {0.0,0.6,0.0};
 color azul = { 0.0, 0.15,0.35 };
 color azul_ceu = {0.0, 0.0, 0.9};
 color azul_claro = {0.0, 1.0, 1.0};
@@ -87,10 +93,25 @@ color branco = { 1.0, 1.0, 1.0 };
 color branco_gelo = { 0.88,0.91,0.89 };
 color amarelo = { 1.0, 1.0, 0.0 };
 color violeta = { 0.54, 0.17, 0.88 };
-color cinza = { 0.8, 0.8, 0.8 };
-color cinza_escuro = { 0.67,0.67,0.67 };
+color cinza_claro = { 0.8, 0.8, 0.8 };
+color cinza_medio = { 0.67,0.67,0.67 };
+color cinza_escuro = {0.5,0.5,0.5};
+color cinza_escuro2 = {0.3,0.3,0.3};
 color laranja = { 1.0, 0.6, 0.2 };
 color rosado = {1.0, 0.0, 0.7};
+
+// Camera position
+float x = 1.0, y = 1.0, z=1.0; // initially 5 units south of origin
+float deltaMove = 0.0; // initially camera doesn't move
+
+// Camera direction
+float lx = 0.0, ly = 0.0, lz = 0.0; // camera points initially along y-axis
+float angle = 0.0; // angle of rotation for the camera direction
+float deltaAngle = 0.0; // additional angle change when dragging
+
+// Mouse drag control
+int isDragging = 0; // true when dragging
+int xDragStart = 0; // records the x-coordinate when dragging starts
 
 void desenha(float p1[3],float p2[3],float p3[3],float p4[3]){
     glBegin(GL_QUADS);
@@ -177,7 +198,7 @@ void canhao3D(float r, float h){
   float teta2 = 0.0f;
   float raio = r+0.1;
   float angulo = 0;
-  glColor3fv(cinza);
+  glColor3fv(cinza_escuro);
     glBegin(GL_POLYGON);
     while(teta2 < 360.0)
     {
@@ -203,7 +224,7 @@ void canhao3D(float r, float h){
 
   glEnd();
 
-  glColor3fv(cinza);
+  glColor3fv(cinza_escuro);
   teta2= 0.0;
   glBegin(GL_POLYGON);
     while(teta2 < 360.0)
@@ -257,7 +278,7 @@ void cilindro3D(float r, float h){
 
 void Rodas3D(float r, float h){
   float teta2 = 0.0f;
-  glColor3fv(cinza);
+  glColor3fv(cinza_claro);
     glBegin(GL_POLYGON);
     while(teta2 < 360.0)
     {
@@ -301,7 +322,7 @@ void Rodas3D(float r, float h){
 
   glEnd();
 
-  glColor3fv(cinza);
+  glColor3fv(cinza_escuro);
   teta2= 0.0;
   glBegin(GL_POLYGON);
     while(teta2 < 360.0)
@@ -310,7 +331,7 @@ void Rodas3D(float r, float h){
       teta2 += 0.1;
     }
   glEnd();
-  
+
 }
 
 void triangulo()
@@ -404,17 +425,14 @@ int janelas(float tamPredioX, float tamPredioY, float tamJanela)
   int j = 0;
 
   imax = (int) tamPredioY / ( (1.0 + 2 * translatey) * tamJanela);
-  //jmax = (int) (tamPredioX - 0.3*tamJanela ) / (1.2 * tamJanela);
 
-  printf("imax %d\n", imax );
-  //printf("jmax %d\n",jmax );
 
   glTranslatef(0.0, (tamPredioY - tamJanela)/2.0, 0.0);
   //glTranslatef(0.3 * tamJanela, 0.0, 0.0);
 
   for(int i = 0; i < imax; i++)
   {
-    printf("i %d\n", i );
+
     glTranslatef(0.0, -translatey, 0.0);
 
     glPushMatrix();
@@ -434,7 +452,7 @@ int janelas(float tamPredioX, float tamPredioY, float tamJanela)
       glPopMatrix();
 
       glPushMatrix();
-        printf("i %d\n",i );
+        //printf("i %d\n",i );
         glTranslatef( -1.0 * j * (translatex + tamJanela), 0.0, 0.0);
         glScalef(tamJanela, tamJanela, 1.0);
         janela();
@@ -466,7 +484,7 @@ void janelasPredio(float tamPredioX, float tamPredioY, float tamPredioZ, float t
 
 void faceCubo(float p1[3],float p2[3],float p3[3],float p4[3])
 {
-  glColor3f(0.8,0.0,0.0);
+  glColor3fv(cinza_medio);
   glBegin(GL_QUADS);
       glVertex3fv(p1);
       glVertex3fv(p2);
@@ -588,7 +606,8 @@ void plano()
   float v4[3] = {0.5, 0.0, -0.5};
 
 
-  glColor3f(0.36, 0.36, 0.36);
+  //glColor3f(0.36, 0.36, 0.36);
+  glColor3fv(cinza_medio);
   glBegin(GL_QUADS);
       glVertex3fv(v1);
       glVertex3fv(v2);
@@ -603,10 +622,6 @@ void quadrado1()
   plano();
 }
 
-void quadrados()
-{
-
-}
 
 void cubo()
 {
@@ -641,31 +656,6 @@ void cubo()
 
 }
 
-
-void cena()
-{
-  glTranslatef(0,0, -10);
-
-  glPushMatrix();
-      predio(4, 8, 2, 0.5);
-  glPopMatrix();
-
-
-  glPushMatrix();
-    glTranslatef(6, 0, 3);
-    glRotatef(180, 0.0, 1.0, 0.0);
-    predio(5, 5, 2.5, 0.5);
-  glPopMatrix();
-
-  glPushMatrix();
-    glTranslatef(0, 0, -7);
-
-    predio(5, 15, 2.5, 0.5);
-  glPopMatrix();
-
-
-  }
-
 void circulo()
 {
   float v1[3] = {0.0, 0.0, 0.0};
@@ -686,7 +676,7 @@ void quarteirao()
 {
   glPushMatrix();
     glPushMatrix();
-      glRotatef(45, 0.0,1.0, 0.0);
+      //glRotatef(45, 0.0,1.0, 0.0);
       plano();
       prediosLosango();
     glPopMatrix();
@@ -700,11 +690,20 @@ void quarteirao()
 void quarteiroes()
 {
   glPushMatrix();
-  for(int i = 0; i < 5; i++)
-  {
-    glTranslatef(0.0, 0.0, -2.0);
-    quarteirao();
+  glTranslatef(0.3, 0.0, 0.0);
+  quarteirao();
+  for(int j=0; j < 4;j++){
+    glRotatef(-90, 0.0, 1.0, 0.0);
+    for(int i = 0; i < 1; i++)
+    {
+      //glRotatef(-60, 0.0, 1.0, 0.0);
+      glTranslatef(2, 0.0, 0.0);
+
+      quarteirao();
+    }
   }
+
+  quarteirao();
   glPopMatrix();
 }
 
@@ -715,12 +714,14 @@ void esboco()
       circulo();
     glPopMatrix();
 
-    glScalef(15.0, 17.0, 15.0);
+    glScalef(50, 70, 50);//////////    tamanho predio x50, y70, z50
       glPushMatrix();
-        glRotatef(-90, 0.0, 1.0, 0.0);
+
+        //glRotatef(-90, 0.0, 1.0, 0.0);
+
         quarteiroes();
       glPopMatrix();
-   
+
 }
 /// trata texto
 void renderbitmap(float x, float y, void *font, char *string)
@@ -932,29 +933,17 @@ void tank_Vermelho()
   /////////////////////////////// escotilha
   glColor3fv(violeta); ///  vermelho
   glTranslatef(-(0.1 * tx), (ty * 1.65)+0.7, 0);
-  glRotatef(RotC1, 0, 0, 1);
-  glRotatef(RotyC1, 1, 0, 0);
+  glRotatef(RotyC1, 0, 1, 0);
+  glRotatef(-90,0,0,1);
   glutSolidSphere(1.5,20,20);
-  cil = -30;
-  glScaled(0.5, 0.5,  1);
-  //canhao3D(1,tx);
-  while(cil <30){
-    glRotatef(cil, 0, 0, 1);
-    glColor3f(0.0, 0.0, 0.0); ////// preto
-    canhao();
-    cil+=1;
-  }
-  glPopMatrix();
   /////////////////////////////// canhÃ¯Â¿Â½o
-  glPushMatrix();
-  glTranslatef(-tx/10.5,1.6*ty+0.7, 0);
   glRotatef(RotC1, 0, 0, 1);
-  glRotatef(RotyC1, 1, 0, 0);
   canhao3D(0.8,2*ty);
-  /////////////////////////// boca canhÃ¯Â¿Â½o
-  glColor3f(0.5, 0.5, 0.5);
   glTranslatef(0,ty*1.8,0);
+   /////////////////////////// boca canhÃ¯Â¿Â½o
+  glColor3f(0.5, 0.5, 0.5);
   glutSolidSphere(0.8,20,20);
+
   glPopMatrix();
 
   /////////////////////////// basecanhao
@@ -1011,34 +1000,22 @@ void tank_Azul()
   int cil = 0;
   glRotatef(180, 0, 1, 0); //////   rotaciona em y
 
-glPushMatrix();
-  /////////////////////////////// escotilha
-  glColor3fv(azul); ///  vermelho
-  glTranslatef(-(0.1 * tx), (ty * 1.65)+0.7, 0);
-  glRotatef(RotC2, 0, 0, 1);
-  glRotatef(RotyC2, 1, 0, 0);
-  glutSolidSphere(1.5,20,20);
-  cil = -30;
-glScaled(0.5, 0.5,  1);
-  while(cil <30){
-    glRotatef(cil, 0, 0, 1);
-    glColor3f(0.0, 0.0, 0.0); ////// preto
-    canhao();
-    cil+=1;
-  }
-  glPopMatrix();
-  /////////////////////////////// canhÃ¯Â¿Â½o
   glPushMatrix();
-  glTranslatef(-tx/10.5,1.6*ty+0.7, 0);
+  /////////////////////////////// escotilha
+  glColor3fv(violeta); ///  vermelho
+  glTranslatef(-(0.1 * tx), (ty * 1.65)+0.7, 0);
+  glRotatef(RotyC2, 0, 1, 0);
+  glRotatef(90,0,0,1);
+  glutSolidSphere(1.5,20,20);
+  /////////////////////////////// canhÃ¯Â¿Â½o
   glRotatef(RotC2, 0, 0, 1);
-  glRotatef(RotyC2, 1, 0, 0);
   canhao3D(0.8,2*ty);
-  ///////////////////////////// boca canhÃ¯Â¿Â½o
-  glColor3f(0.5, 0.5, 0.5);
   glTranslatef(0,ty*1.8,0);
+   /////////////////////////// boca canhÃ¯Â¿Â½o
+  glColor3f(0.5, 0.5, 0.5);
   glutSolidSphere(0.8,20,20);
-  glPopMatrix();
 
+  glPopMatrix();
   /////////////////////////// basecanhao
   glPushMatrix();
   glColor3f(0.5, 0.5, 0.5);
@@ -1047,7 +1024,7 @@ glScaled(0.5, 0.5,  1);
   glPopMatrix();
   //////////////////////////// carroceria
   glPushMatrix();
-  glColor3fv(azul_claro); 
+  glColor3fv(azul_claro);
   glTranslatef(0,0.7,0);
   retangulos();
   glPopMatrix();
@@ -1087,14 +1064,60 @@ glScaled(0.5, 0.5,  1);
   glRotatef(-180, 0, 1, 0); //////   rotaciona em y
 }
 
-void chao(){
-  glColor3fv(laranja);
+
+void faixas(){
+  glColor3fv(amarelo);
   glBegin(GL_QUADS);
-  glVertex3f(-200,0.1,200);
+  glVertex3f(-175,0.01,-2);
+  glVertex3f(-175,-0.2,-7.5);
+  glVertex3f(175,-0.2,-7.5);
+  glVertex3f(175,0.01,-2);
+  glEnd();
+
+  glBegin(GL_QUADS);
+  glVertex3f(-175,0.01,2);
+  glVertex3f(-175,-0.2,7.5);
+  glVertex3f(175,-0.2,7.5);
+  glVertex3f(175,0.01,2);
+  glEnd();
+}
+
+void chao(){
+  glColor3fv(cinza_escuro2);
+  glBegin(GL_QUADS);
+  glVertex3f(-200,0.0,200);
   glVertex3f(-200,-0.9,-200);
   glVertex3f(200,-0.9,-200);
-  glVertex3f(200,0.1,200);
+  glVertex3f(200,0.0,200);
   glEnd();
+  glColor3fv(verde_escuro);
+  glBegin(GL_QUADS);
+  glVertex3f(-150,0.1,150);
+  glVertex3f(-150,-0.0,-150);
+  glVertex3f(150,-0.0,-150);
+  glVertex3f(150,0.1,150);
+  glEnd();
+
+  glPushMatrix();
+  glTranslatef(0,0,175);
+  faixas();
+  glPopMatrix();
+  glPushMatrix();
+  glRotatef(90,0,1,0);
+  glTranslatef(0,0,175);
+  faixas();
+  glPopMatrix();
+  glPushMatrix();
+  glRotatef(180,0,1,0);
+  glTranslatef(0,0,175);
+  faixas();
+  glPopMatrix();
+  glPushMatrix();
+  glRotatef(270,0,1,0);
+  glTranslatef(0,0,175);
+  faixas();
+  glPopMatrix();
+  
 }
 void teto(){
   glColor3fv(azul_ceu);
@@ -1108,7 +1131,7 @@ void teto(){
 //// desenha fundo
 static void Ceu(float altura, float largura)
 {
-
+  glLineWidth(0.5);
   glBegin(GL_LINE_LOOP);
     glColor3fv(rosado);
     glVertex3f(-200,-0.2,-200);
@@ -1232,111 +1255,9 @@ static void retangulo(float altura, float largura)
   glEnd();
 
 }
-//// desenha muro
-static void muros()
-{
-
-
-  //retangulo( 2 * HEIGHT_TIJOLO, 2 * WIDTH_TIJOLO);
-  //pedacoMuro(2, 2, 0);
-  /*
-  glLoadIdentity();
-  glTranslatef(2.5 * WIDTH_TIJOLO, 9 *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 15 * HEIGHT_TIJOLO, 6.5 * WIDTH_TIJOLO);//
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(15 , 6 , 1);
-  glLoadIdentity();
-  glTranslatef( (2.5 + 0.5 + 8 + 1.0)* WIDTH_TIJOLO, 9 *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 5 * HEIGHT_TIJOLO, 8.5 * WIDTH_TIJOLO);///
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(5 , 8 , 0);
-  glLoadIdentity();
-  glTranslatef( (2.5 + 0.5 + 8 + 1.0)* WIDTH_TIJOLO, (9 + 5) *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 10 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);////
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(10 , 2.0 , 1);
-  glLoadIdentity();
-  glTranslatef( (2.5 + 0.5 + 8 + 1.5 + 5)* WIDTH_TIJOLO, (9 + 5) *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 10 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(10 , 2.0 , 1);
-  */
-
-}
-void muros2()
-{
-
-  //retangulo( 2 * HEIGHT_TIJOLO, 2 * WIDTH_TIJOLO);
-  //pedacoMuro(2, 2, 0); //altura e largura
-  /*
-  glLoadIdentity();
-  glTranslatef(0.0, 9 *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 6 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(6 , 2.0 , 1);
-  glLoadIdentity();
-  glTranslatef(7.5 * WIDTH_TIJOLO, 9 *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 15 * HEIGHT_TIJOLO, 2.5 * WIDTH_TIJOLO);
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(15 , 2.5 , 1);
-  glLoadIdentity();
-  glTranslatef( 5 * WIDTH_TIJOLO, (9 + 15.0) *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 5 * HEIGHT_TIJOLO, 7.5 * WIDTH_TIJOLO);
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(5 , 7.5 , 0);
-  glLoadIdentity();
-  glTranslatef( 15 * WIDTH_TIJOLO, (9 + 15) *  HEIGHT_TIJOLO, 0.0 );
-  retangulo( 5 * HEIGHT_TIJOLO, 5.5 * WIDTH_TIJOLO);
-  glTranslatef(0.5 * WIDTH_TIJOLO, 0.0, 0.0 );
-  pedacoMuro(5 , 5.0 , 1);*/
-
-}
-void espaco1(){///// mapeia possiveis posiÃƒÂ§ÃƒÂµes para carrinhos
-
-
-  vetPCarM1[0][0] = ((2.5 * WIDTH_TIJOLO)/2);
-  vetPCarM1[0][1] = (9*HEIGHT_TIJOLO);
-
-  vetPCarM1[1][0] = ((2.5*WIDTH_TIJOLO)+((6.5*WIDTH_TIJOLO)/2));
-  vetPCarM1[1][1] = (9*HEIGHT_TIJOLO)+((15*HEIGHT_TIJOLO));
-
-  vetPCarM1[2][0] = (12*WIDTH_TIJOLO) +(8.5 *WIDTH_TIJOLO)/2;
-  vetPCarM1[2][1] = (9*HEIGHT_TIJOLO)+(5*HEIGHT_TIJOLO);
-
-  vetPCarM1[3][0] = (12*WIDTH_TIJOLO)+(2.5*WIDTH_TIJOLO)/2;
-  vetPCarM1[3][1] = (14*HEIGHT_TIJOLO)+(10*HEIGHT_TIJOLO);
-
-  vetPCarM1[4][0] = (17.5*WIDTH_TIJOLO)+(2.5*WIDTH_TIJOLO)/2;
-  vetPCarM1[4][1] = (14*HEIGHT_TIJOLO)+(10*HEIGHT_TIJOLO);
-
-  vetPCarM1[5][0] = (20* WIDTH_TIJOLO)/2;
-  vetPCarM1[5][1] =  (9*HEIGHT_TIJOLO);
-}
-
-void espaco2(){
-  vetPCarM2[0][0] = ((2.5 * WIDTH_TIJOLO)/2);
-  vetPCarM2[0][1] = (9*HEIGHT_TIJOLO)+(6*HEIGHT_TIJOLO);
-
-  vetPCarM2[1][0] = (7.5*WIDTH_TIJOLO)+(5*HEIGHT_TIJOLO)/2;
-  vetPCarM2[1][1] = (14*HEIGHT_TIJOLO)+(7.5*WIDTH_TIJOLO);
-
-  vetPCarM2[2][0] = (15*WIDTH_TIJOLO) +(5 *WIDTH_TIJOLO)/2;
-  vetPCarM2[2][1] = (23*HEIGHT_TIJOLO)+(6*HEIGHT_TIJOLO);
-
-  vetPCarM2[3][0] = (15*WIDTH_TIJOLO)-(2.5*WIDTH_TIJOLO)/2;
-  vetPCarM2[3][1] = (9*HEIGHT_TIJOLO);
-}
 
 static void Bomba(){
-
-  float teta2 = 0.0f;
-    glBegin(GL_POLYGON);
-    while(teta2 < 360.0)
-    {
-      glVertex2f(cos(teta2/180.0 * PI),sin(teta2/180.0 * PI));
-      teta2 += 0.1;
-    }
-  glEnd();
+  glutSolidSphere(1,10,10);
 }
 ////// ratangulo menu
 static void retMenu(float altura, float largura)
@@ -1368,80 +1289,153 @@ void menuBox(){
   glPopMatrix();
 }
 
+void espaco1(){///// mapeia possiveis posiÃƒÂ§ÃƒÂµes para carrinhos
+
+   /*
+  Pontos de Spawn carrinho
+          0,70,0
+         -60,70,0
+          30,70,0
+          37,70,50
+          20,70,80
+         -67,70,95
+         -40,70,125
+          20,70,115
+         -97,70,95
+         -80,70,-15  */
+  vetPCarM1[0][0] = 0;
+  vetPCarM1[0][1] = 70;
+  vetPCarM1[0][2] = 0;
+
+  vetPCarM1[1][0] = -60;
+  vetPCarM1[1][1] = 70;
+  vetPCarM1[1][2] = 0;
+
+  vetPCarM1[2][0] = 30;
+  vetPCarM1[2][1] = 70;
+  vetPCarM1[2][2] = 0;
+
+  vetPCarM1[3][0] = 37;
+  vetPCarM1[3][1] = 70;
+  vetPCarM1[3][2] = 50;
+
+  vetPCarM1[4][0] = 20;
+  vetPCarM1[4][1] = 70;
+  vetPCarM1[4][2] = 80;
+
+  vetPCarM1[5][0] = -67;
+  vetPCarM1[5][1] = 70;
+  vetPCarM1[5][2] = 95;
+
+  vetPCarM1[6][0] = -40;
+  vetPCarM1[6][1] = 70;
+  vetPCarM1[6][2] = 125;
+
+  vetPCarM1[7][0] = 20;
+  vetPCarM1[7][1] = 70;
+  vetPCarM1[7][2] = 115;
+
+  vetPCarM1[8][0] = -97;
+  vetPCarM1[8][1] = 70;
+  vetPCarM1[8][2] = 95;
+
+  vetPCarM1[9][0] = -80;
+  vetPCarM1[9][1] = 70;
+  vetPCarM1[9][2] = -15;
+}
+
+
 void spawnCar2(){
   srand( (unsigned)time(NULL) );
-  int C1 = 0;
-  int C2 = 0;
   if(novoJogo){
-    mapa = rand()%2;
     pontoJ1 = 0;
     pontoJ2 = 0;
     novoJogo = false;
   }
 
-  if(mapa == 0){
-  int C1 = rand()%6;
-  int C2 = rand()%6;
+  int C1 = rand()%10;
+  int C2 = rand()%10;
   espaco1();
 
    while(C2 == C1){
-    C2 = rand()%6;
+    C2 = rand()%10;
   }
+
+
   atualPcar1[0] = vetPCarM1[C1][0];
   atualPcar1[1] = vetPCarM1[C1][1];
+  atualPcar1[2] = vetPCarM1[C1][2];
+
+
   atualPcar2[0] = vetPCarM1[C2][0];
   atualPcar2[1] = vetPCarM1[C2][1];
+  atualPcar2[2] = vetPCarM1[C2][2];
+
+
   PColisao1[0] = vetPCarM1[C1][0];
   PColisao1[1] = vetPCarM1[C1][1];
+  PColisao1[2] = vetPCarM1[C1][2];
+
   PColisao2[0] = vetPCarM1[C2][0];
   PColisao2[1] = vetPCarM1[C2][1];
+  PColisao2[2] = vetPCarM1[C2][2];
 
-  }else{
-    int C1 = rand()%4;
-    int C2 = rand()%4;
-    espaco2();
-   while(C2 == C1){
-    C2 = rand()%4;
-  }
-  atualPcar1[0] = vetPCarM2[C1][0];
-  atualPcar1[1] = vetPCarM2[C1][1];
-  atualPcar2[0] = vetPCarM2[C2][0];
-  atualPcar2[1] = vetPCarM2[C2][1];
-  PColisao1[0] = vetPCarM2[C1][0];
-  PColisao1[1] = vetPCarM2[C1][1];
-  PColisao2[0] = vetPCarM2[C2][0];
-  PColisao2[1] = vetPCarM2[C2][1];
 
-  }
   glutPostRedisplay();
 }
 
+void balisticaBomba2();
 void transformacao(){
-    glTranslatef(0,-20,-60);
+  glPushMatrix();
+  textoVelo();
+  glPopMatrix();
+  glPushMatrix();
+  textoPonto();
+  glPopMatrix();
+  glPushMatrix();
+  texto();
+  glPopMatrix();
+
   if(!posicao && !colisao || novoJogo && !colisao){ // sorteia posiÃƒÂ§ÃƒÂ£o para os carros e novo mapa
     spawnCar2();
     posicao = true;
   }
 
-  if(mapa == 0){ // seleciona mapa sorteado
-    muros();
-  }
-  else if(mapa == 1){
-
-  muros2();
-  }
-
   glPushMatrix();
-  Ceu(500,500);
+  textoVelo();
+  glPopMatrix();
+  if(menu){
+    menuBox();
+  }
+  if(pontoJ1 == 3 || pontoJ2 == 3){
+    novoJogo = true;
+  }
+
+  glRotatef(Rcam_xat,0,0,1);
+  glRotatef(Rcam_yat,0,1,0);
+  glRotatef(Rcam_zat,1,0,0);
+  glTranslatef(Cam_xat,Cam_yat,Cam_zat);
+  
+  glPushMatrix();
+  glTranslatef(-30,0,35);
+  Ceu(200,200);
   glRotatef(90,0,1,0);
-  Ceu(500,500);
+  Ceu(200,200);
   glRotatef(90,0,1,0);
-  Ceu(500,500);
+  Ceu(200,200);
   glRotatef(90,0,1,0);
-  Ceu(500,500);
-  glTranslatef(0,500,0);
+  Ceu(200,200);
+  glTranslatef(0,200,0);
   teto();
   glPopMatrix();
+
+  glPushMatrix();
+  glTranslatef(-30,0,35);
+  chao();
+  glColor3fv(amarelo);
+
+  glPopMatrix();
+
   glPushMatrix();
   glColor3fv(cinza_escuro);
   esboco();
@@ -1449,48 +1443,216 @@ void transformacao(){
 
 
   glPushMatrix();
-  glTranslatef(atualPcar1[0], atualPcar1[1], 0.0);
+  glTranslatef(atualPcar1[0], atualPcar1[1], atualPcar1[2]);
   tank_Vermelho();
+
   glPopMatrix();
 
   glPushMatrix();
-  glTranslatef(atualPcar2[0], atualPcar2[1] , 0.0);
+  glTranslatef(atualPcar2[0], atualPcar2[1], atualPcar2[2]);
+
   tank_Azul();
   glPopMatrix();
-  chao();
+
+  if(jogada == 0){
+    glPushMatrix();
+
+    //glRotatef(RotyC1,0,1,0);
+    glTranslatef(atualPcar1[0],atualPcar1[1],atualPcar1[2]); // traço da trajetoria do tiro para joagdor 1
+    trajetoria(teta_tankVermelho,V01);
+    glPopMatrix();
+    glutPostRedisplay();
+  }else{
+  glPushMatrix();
+
+  //glRotatef(RotyC2,10,1,0);
+  glTranslatef(atualPcar2[0],atualPcar2[1],atualPcar2[2]);// traço da trajetoria do tiro para joagdor 2
+  trajetoria(teta_tankAzul,V02);
+  glutPostRedisplay();
+  glPopMatrix();
+  }
+
+  if(bomba)
+  {
+    glPushMatrix();
+
+      //glTranslatef(atualPcar1[0],atualPcar1[1],atualPcar1[2]);
+      balisticaBomba();
+      //trajetoriaBalistica();
+    glPopMatrix();
+  }
+  
 
 }
-void camera(void){
-  if(delta_moveCB){
-    eyex+= delta_moveCB * lookx *0.5;
-    eyey+= delta_moveCB * looky *0.5;
-    eyez+= delta_moveCB * lookz *0.5;
 
-    elx = lookx + eyex;
-    ely = 1.0;
-    elz = lookz + eyez;
+static void balisticaBomba()
+{
 
-    delta_moveCB = 0;
-    glutPostRedisplay();
+  float translateX = 0.0;
+  float translateY = 0.0;
+  float translateZ = 0.0;
+
+  float trajeX = 1.5;
+  float trajeY = 4.0;
+
+  float i = 0;
+  float delta_espaco_X = V0x * delta_tempo;
+  float delta_espaco_Y = V0y * delta_tempo - g * delta_tempo * delta_tempo / 2;
+  float delta_espaco_Z = V0x * delta_tempo;
+
+  translateX = X_bomba + delta_espaco_X;// +  atualPcar1[0]; /// posiciona objetos para jogador 1
+  translateY = Y_bomba + delta_espaco_Y;// +  atualPcar1[1];
+
+  glColor3f(0.0,0.0,0.0);
+  glPushMatrix();
+  if(jogada == 0)
+  {
+    glTranslatef(atualPcar1[0] ,atualPcar1[1] ,atualPcar1[2]);
   }
-  if(delta_moveFT){
-    eyex+= delta_moveFT * lookx *0.5;
-    //eyey+= delta_moveFT * looky*0.1;
-    eyez+= delta_moveFT * lookz *0.5;
+  else{
+    glTranslatef(atualPcar2[0] ,atualPcar2[1] ,atualPcar2[2]);
+  }
 
-    elx = lookx + eyex;
-    //ely = eyey;
-    elz = lookz + eyez;
+  if(jogada == 0){
+      glRotatef(RotyC1,0,1,0);
+    }else{
+      glRotatef(RotyC2,0,1,0);
+    }
 
-    delta_moveFT = 0;
-    glutPostRedisplay();
+  glTranslatef(translateX + trajeX , translateY + trajeY, translateZ);
+
+  glScaled(0.5, 0.5, 0.5);
+  Bomba();
+  glScaled(1/0.5, 1/0.5, 1.0/0.5);
+
+  glPopMatrix();
+
+  if(delta_tempo > 10)
+  {
+    printf("tempo esgotado\n" );
+    bomba = false;
+    delta_tempo = 0;
+    mudarJogador = true;
+    if(jogada == 0)
+    {
+      jogada = 1;
+    }
+    else
+    {
+      jogada = 0;
+    }
+  }
+  glutTimerFunc(200, redisplay, X_bomba);
+  /*if(translateY <= 0){
+    bomba = false;
+    delta_tempo = 0;
+    if(jogada == 0){
+      jogada =1;
+    }else{
+      jogada =0;
+    }
+  }*/
+/*
+  if(jogada == 0){
+      translateX = X_bomba + delta_espaco_X; //+ ( atualPcar1[0]); /// posiciona objetos para jogador 1
+      translateY = Y_bomba + delta_espaco_Y;// + ( atualPcar1[1]);
+
+
+      if(translateX > PColisao2[0] - tx/2 && translateX < PColisao2[0] + tx/2 // trata colisão com jogador 2
+        && translateY > PColisao2[1] &&  translateY < PColisao2[1] + ty+3.5){
+
+      colisao = true;
+
+
+      bomba = false;
+      delta_tempo = 0;
+
+        jogada = 1;
+        pontoJ1 += 1;
+        posicao = false;
+
+      glutPostRedisplay();
+    }else{
+
+        glColor3f(0.0,0.0,0.0);
+        glTranslatef(translateX, translateY, 0.0);
+        glScaled(0.5, 0.5, 0.0);
+        Bomba();
+        glScaled(1/0.5, 1/0.5, 0.0);
+        glutTimerFunc(30, redisplay, X_bomba);
+    }
+  }else{
+        translateX = X_bomba + delta_espaco_X + ( atualPcar2[0]+0.4);////// posiciona objetos para jogador 2
+        translateY = Y_bomba + delta_espaco_Y + (3.7+atualPcar2[1]);
+
+        if(translateX > PColisao1[0] - tx/2 && translateX < PColisao1[0] + tx/2 //// trata colisão com jgador 1
+        && translateY > PColisao1[1] && translateY < PColisao1[1] + ty+3.5){
+
+        colisao = true;
+
+
+        bomba = false;
+        delta_tempo = 0;
+
+        jogada = 0;
+
+        pontoJ2 += 1;
+        posicao = false;
+
+        glutPostRedisplay();
+      }else{
+        glLoadIdentity();
+        glColor3f(0.0,0.0,0.0);
+        glTranslatef(translateX, translateY, translateZ);
+        glScaled(0.5, 0.5, 0.0);
+        Bomba();
+        glScaled(1/0.5, 1/0.5, 0.0);
+        glutTimerFunc(30, redisplay, X_bomba);
+      }
+
+      printf("translateX: %f\n",translateX );
+      printf("translateY: %f\n", translateY);
+
+    }
+    */
+}
+void trajetoria(float teta,float V0)
+{
+  //printf("trajetoria\n" );
+  float V0x = V0 * cos(teta/180.00 * PI);
+  float V0y = V0 * sin(teta/180.00 * PI);
+
+  float temp = 0.0;
+  float trajeX = 1.5;
+
+  float trajeY = 4.0;
+  //glLoadIdentity();
+  glLineWidth(3);
+  glColor3fv(vermelho);
+  if(jogada == 0){
+      glRotatef(RotyC1,0,1,0);
+    }else{
+      glRotatef(RotyC2,0,1,0);
+    }
+
+  glBegin(GL_LINE_STRIP);
+  while(temp <= 1* (V0y * 2 / g))
+  {
+
+    glVertex3f(trajeX + V0x * temp , trajeY + V0y * temp - g * temp * temp /2.0,0);
+    temp += 0.1;
+  }
+  glEnd();
+}
+
+
+void redisplay(int value){
+  if(bomba){
+    delta_tempo += 0.1;
   }
   glutPostRedisplay();
-  //printf("eyex: %f\n eyey: %f\n eyez: %f\n lookx: %f\n looky: %f\n lookz: %f\n", eyex,eyey,eyez,lookx,looky,lookz);
-
 }
-
-/* FunÃ¯Â¿Â½Ã¯Â¿Â½es projetadas para tratar as diferentes classes de eventos */
+/* Funcoes projetadas para tratar as diferentes classes de eventos */
 void redimensiona(int w, int h)
 {
   float aspect = (float)w / (float)h;
@@ -1514,9 +1676,10 @@ void Atualiza_desenho(void){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-     gluLookAt(eyex,eyey,eyez,
-              elx,ely,elz,
-              0.0,1.0,0.0);
+    gluLookAt(
+        x,      y,      z,
+        x + lx, 1.0 + ly, z + lz,
+        0.0,    1.0,    0.0);
     transformacao();
 
     glutSwapBuffers();
@@ -1532,75 +1695,89 @@ void Teclado( unsigned char tecla, int x, int y){
           exit(0);
         break;
       case 'i':
-    if (RotC1 < 90 && !bomba)
+    if (RotC1 < 45 && !bomba)
     {
-      RotC1 += 3;
+      RotC1 += 1;
 
-      teta_tankVermelho = RotC1 - 270;
+      teta_tankVermelho = RotC1 ;
 
-      printf("RotaÃƒÂ§ÃƒÂ£o anti horario\n");
+       
     }
     break;
-  case 'k':
+    case 'k':
 
-    if (RotC1 > -90 && !bomba)
+    if (RotC1 > 0 && !bomba)
     {
-      RotC1 -= 3;
+      RotC1 -= 1;
       teta_tankVermelho = RotC1;
 
-      printf("RotaÃƒÂ§ÃƒÂ£o horario\n");
+      
     }
     break;
     case 'j':
-    if (RotyC1 < 90 && !bomba)
+    if (RotyC1 < 180 && !bomba)
     {
-      RotyC1 += 3;
+      RotyC1 += 1;
+      if(Cam ==2 && jogada == 0){
 
-      teta_tankVermelho = RotyC1;
+            Rcam_yat=-RotyC1-90;
 
-      printf("RotaÃƒÂ§ÃƒÂ£o anti horario\n");
+          }
+
+      
     }
     break;
   case 'l':
 
-    if (RotyC1 > -90 && !bomba)
+    if (RotyC1 > -180 && !bomba)
     {
-      RotyC1 -= 3;
-      teta_tankVermelho = RotyC1;
+      RotyC1 -= 1;
+      if(Cam ==2 && jogada == 0){
 
-      printf("RotaÃƒÂ§ÃƒÂ£o horario\n");
+            Rcam_yat=-RotyC1-90;
+
+          }
+
+   
     }
     break;
   case 'w':
-    if (RotC2 < 90 && !bomba)
+    if (RotC2 > -45 && !bomba)
     {
-      RotC2 += 3;
-      teta_tankAzul = RotC2;
-
+      RotC2 -= 1;
+     teta_tankAzul = -RotC2;
+     
     }
     break;
   case 's':
-    if (RotC2 > -90 && !bomba)
+    if (RotC2 < 0 && !bomba)
     {
-      RotC2 -= 3;
-      teta_tankAzul = RotC2;
+      RotC2 += 1;
+      teta_tankAzul = -RotC2;
 
     }
     break;
     case 'd':
-    if (RotyC2 > -90 && !bomba)
+    if (RotyC2 > -180 && !bomba)
     {
-      RotyC2 -= 3;
-      teta_tankAzul = RotyC2;
+      RotyC2 -= 1;
+      if(Cam ==3 && jogada == 1){
+            
+            Rcam_yat=RotyC2;
+          
+          }
 
     }
     break;
     case 'a':
-    if (RotyC2 < 90 && !bomba)
+    if (RotyC2 < 180 && !bomba)
     {
-      RotyC2 += 3;
-      teta_tankAzul = RotyC2;
-
+      RotyC2 += 1;
+      if(Cam ==3 && jogada == 1){
+            
+            Rcam_yat=RotyC2;
+          
+          }
     }
     break;
 
@@ -1626,7 +1803,7 @@ void Teclado( unsigned char tecla, int x, int y){
     {
       if(!bomba)
       {
-        V01 += 2.0;
+        V01 += 1.0;
         atualPosicaoSlider1_X = (V01 - 25.0)/10.0;
 
       }
@@ -1634,7 +1811,7 @@ void Teclado( unsigned char tecla, int x, int y){
     }else{
       if(!bomba)
       {
-        V02 += 2;
+        V02 += 1.0;
         atualPosicaoSlider2_X = (V02 - 25.0)/10.0;
       }
 
@@ -1647,7 +1824,7 @@ void Teclado( unsigned char tecla, int x, int y){
     {
       if(!bomba)
       {
-        V01 -= 2;
+        V01 -= 1;
         atualPosicaoSlider1_X = (V01 - 25.0)/10.0;
 
       }
@@ -1675,64 +1852,151 @@ void Teclado( unsigned char tecla, int x, int y){
     if(!novoJogo){
       novoJogo = true;
     }
+    break;
+    case 'c':
+          Cam+=1;
+          if(Cam ==1){
+            Cam_xat=30;
+            Cam_yat=-180;
+            Cam_zat=-25;
+            Rcam_xat=0;
+            Rcam_yat=0;
+            Rcam_zat=-90;
+          }
+          else if(Cam ==2 && jogada == 0){
+            Cam_xat=(-1)*atualPcar1[0];
+            Cam_yat=(-1)*atualPcar1[1]-5;
+            Cam_zat=(-1)*atualPcar1[2];
+            Rcam_xat=0;
+            Rcam_yat=-RotyC1-90;
+            Rcam_zat=0;
+          }
+          else if(Cam ==2 && jogada == 1){
+            Cam_xat=(-1)*atualPcar2[0];
+            Cam_yat=(-1)*atualPcar2[1]-5;
+            Cam_zat=(-1)*atualPcar2[2];
+            Rcam_xat=0;
+            Rcam_yat=-RotyC2-90;
+            Rcam_zat=0;
+          }
+          else if(Cam ==3 && jogada == 0){
+            Cam_xat=(-1)*atualPcar2[0];
+            Cam_yat=(-1)*atualPcar2[1]-5;
+            Cam_zat=(-1)*atualPcar2[2];
+            Rcam_xat=0;
+            Rcam_yat=RotyC1+90;
+            Rcam_zat=0;
+          }
+           else if(Cam ==3 && jogada == 1){
+            Cam_xat=(-1)*atualPcar2[0];
+            Cam_yat=(-1)*atualPcar2[1]-5;
+            Cam_zat=(-1)*atualPcar2[2];
+            Rcam_xat=0;
+            Rcam_yat=RotyC2+90;
+            Rcam_zat=0;
+          }else if(Cam == 4){
+            Cam = 0;
+          }
+          break;
     case '+':
-      delta_moveFT = 1.0;
+
+      Rcam_zat+=1.0;
       break;
     case '-':
-    delta_moveFT = -1.0;
+       Rcam_zat-=1.0;
       break;
 
     }
 }
-void TeclasEspec( int key, int x, int y){
-  if (key == GLUT_KEY_UP){
-    delta_moveCB = -1.0;
-  }
-  else if (key == GLUT_KEY_DOWN){
-    delta_moveCB = 1.0;
+
+
+void camera(void){
+
+
+  if (deltaMove) { // update camera position
+    x += deltaMove * lx * 0.5;
+    z += deltaMove * lz * 0.5;
+    //y += deltaMove * ly * 0.1;
   }
 
+  /*if(mudarJogador)
+  {
+    printf("mudarJogador\n" );
+    if(jogada == 1)
+    {
+      lx =  atualPcar2[0] - x;
+
+      //ly = atualPcar2[1] - y;
+
+      lz = atualPcar2[2] - z;
+    }
+
+    else {
+      lx = x - atualPcar1[0];
+
+      //ly = atualPcar1[1] - y;
+
+      lz = z - atualPcar1[2];
+    }
+
+    angle = 0.0;
+    deltaAngle = 0.0;
+
+    mudarJogador = false;
+  }*/
+
+  glutPostRedisplay();
+  //printf("eyex: %f\n eyey: %f\n eyez: %f\n lookx: %f\n looky: %f\n lookz: %f\n", eyex,eyey,eyez,lookx,looky,lookz);
+
 }
-void releasespecial(int key, int x, int y){
-  xmovimento = x;
-  if (key == GLUT_KEY_UP){
-    delta_moveCB = 0.0;
+
+void TeclasEspec( int key, int x, int y){
+  switch (key) {
+    case GLUT_KEY_UP : deltaMove = 1.0; break;
+    case GLUT_KEY_DOWN : deltaMove = -1.0; break;
+    case GLUT_KEY_LEFT : Rcam_yat-=1.0; break;
+    case GLUT_KEY_RIGHT : Rcam_yat+=1.0; break;
   }
-  else if (key == GLUT_KEY_DOWN){
-    delta_moveCB = 0.0;
+}
+
+void releasespecial(int key, int x, int y){
+  switch (key) {
+    case GLUT_KEY_UP : deltaMove = 0.0; break;
+    case GLUT_KEY_DOWN : deltaMove = 0.0; break;
   }
 
 }
 void mouseMove(int x, int y){
-  if(movimento){
-    delta_angle = (x -xmovimento) * 0.005;
+  if (isDragging) { // only when dragging
+    // update the change in angle
+    deltaAngle = (x - xDragStart) * 0.005;
 
-    lookx = cos(angle + delta_angle);
-    lookz =  -sin(angle + delta_angle);
-    elx = lookx + eyex;
-    elz = lookz + eyez;
-
+    // camera's direction is set to angle + deltaAngle
+    lx = -sin(angle + deltaAngle);
+    lz = cos(angle + deltaAngle);
   }
 }
 
 void mouseButton(int button, int state, int x, int y){
-  if(button == GLUT_LEFT_BUTTON){
-    if(state == GLUT_DOWN){
-      movimento = 1;
-      xmovimento = x;
-    }else{
-      angle += delta_angle;
-      movimento = 0;
+
+  if (button == GLUT_LEFT_BUTTON) {
+    if (state == GLUT_DOWN) { // left mouse button pressed
+      isDragging = 1; // start dragging
+      xDragStart = x; // save x where button first pressed
+    }
+    else  { /* (state = GLUT_UP) */
+      angle += deltaAngle; // update camera turning angle
+      isDragging = 0; // no longer dragging
     }
   }
-}
 
+}
 
 int main(int argc, char *argv[]){
   glutInit(&argc,argv);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
-  glutInitWindowPosition(350,0);
-  glutInitWindowSize(750,960);
+  glutInitWindowPosition(20,0);
+  glutInitWindowSize(1480,960);
   glutCreateWindow("Canhao - 3D");
   glutReshapeFunc(redimensiona);
   glutDisplayFunc(Atualiza_desenho);
