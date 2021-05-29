@@ -1,3 +1,8 @@
+/*****************************************************************************
+ *  Universidade Federal da Grande Dourados - UFGD                           *
+ *  Trabalho 2 da disciplina de Computação Gráfica - Batalha Urbana 3D          *
+ *  Caio Fernandes Lima, Lucas Matheus de Moraes Florentino                  *
+ *****************************************************************************/
 #include <stdlib.h>
 #include <stdio.h>
 #include <GL/glut.h>
@@ -19,6 +24,10 @@
 #define TAM_CONTAINER_Y 2.0
 #define TAM_BARRA_X 5.0
 #define TAM_BARRA_Y 0.6
+#define limitex 7.8
+#define limitey 6.0
+#define limitez 6
+
 
 void trajetoria(float teta,float V0);
 void redisplay(int value);
@@ -112,6 +121,8 @@ float deltaAngle = 0.0; // additional angle change when dragging
 // Mouse drag control
 int isDragging = 0; // true when dragging
 int xDragStart = 0; // records the x-coordinate when dragging starts
+
+int tamPredio[4] = {50, 70, 55, 80};
 
 void desenha(float p1[3],float p2[3],float p3[3],float p4[3]){
     glBegin(GL_QUADS);
@@ -687,11 +698,15 @@ void quarteirao()
   glPopMatrix();
 }
 
+
 void quarteiroes()
 {
   glPushMatrix();
+    //quarteirao();
+
   glTranslatef(0.3, 0.0, 0.0);
-  quarteirao();
+  //quarteirao();
+
   for(int j=0; j < 4;j++){
     glRotatef(-90, 0.0, 1.0, 0.0);
     for(int i = 0; i < 1; i++)
@@ -699,22 +714,35 @@ void quarteiroes()
       //glRotatef(-60, 0.0, 1.0, 0.0);
       glTranslatef(2, 0.0, 0.0);
 
-      quarteirao();
+      glPushMatrix();
+        //printf(" j %d : tamPredio %d\n", j, tamPredio[j] );
+        glScalef(1, tamPredio[j], 1);
+        quarteirao();
+      glPopMatrix();
     }
   }
 
-  quarteirao();
+    //quarteirao();
   glPopMatrix();
 }
 
 void esboco()
 {
-    glPushMatrix();
-      glTranslatef(0, 0, 0);
-      circulo();
-    glPopMatrix();
 
-    glScalef(50, 70, 50);//////////    tamanho predio x50, y70, z50
+      /*glPushMatrix();
+        glTranslatef(vetPCarM1[8][0], 70, vetPCarM1[8][2]);
+        glScaled(5,1.0,5  );
+        circulo();
+      glPopMatrix();
+
+    glPushMatrix();
+      glTranslatef(vetPCarM1[9][0], 70, vetPCarM1[9][2]);
+      glScaled(10,1.0,10    );
+      circulo();
+    glPopMatrix();*/
+
+
+    glScalef(50, 1.0, 50);//////////    tamanho predio x50, y70, z50
       glPushMatrix();
 
         //glRotatef(-90, 0.0, 1.0, 0.0);
@@ -737,12 +765,14 @@ void texto()
 {
     char buf[100] = {0};
     glColor3f(1.0,0.0,1.0);
+    glTranslated(0,0,-50);
     sprintf(buf,"(Jogador 1) Angulo: %d", teta_tankVermelho);
-    renderbitmap(-15,73,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(50,73,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,1.0,1.0);
+    glTranslated(0,0,50);
     sprintf(buf,"(Jogador 2) Angulo: %d",-teta_tankAzul + 180);
-    renderbitmap(5,73,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(50,73,GLUT_BITMAP_HELVETICA_12, buf);
 }
 //// texto de velocidade slider e botoes
 void textoVelo()
@@ -750,16 +780,16 @@ void textoVelo()
     char buf[100] = {0};
     glColor3f(1.0,0.0,1.0);
     sprintf(buf,"Velocidade 1: %d", V01);
-    renderbitmap(-29,73,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,73,GLUT_BITMAP_HELVETICA_12, buf);
 
     glLoadIdentity();
     glColor3f(0.0,1.0,1.0);
     sprintf(buf,"Velocidade 2: %d", V02);
-    renderbitmap(21,73,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(81,73,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"pressione 'm' menu");
-    renderbitmap(-29,64,GLUT_BITMAP_HELVETICA_18, buf);
+    renderbitmap(-89,64,GLUT_BITMAP_HELVETICA_18, buf);
 
 }
 /// texto exibido no menu
@@ -768,48 +798,48 @@ void textoBotoes()
     char buf[100] = {0};
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"MENU");
-    renderbitmap(-28,66,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-88,66,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(1.0,0.0,0.0);
     sprintf(buf,"Jogador 1:");
-    renderbitmap(-29,63,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,63,GLUT_BITMAP_HELVETICA_12, buf);
 
 
     sprintf(buf,"Angulo: 'j' & 'l'");
-    renderbitmap(-29,61,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,61,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,1.0);
     sprintf(buf,"Jogador 2:");
-    renderbitmap(-29,58,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,58,GLUT_BITMAP_HELVETICA_12, buf);
 
 
     glColor3f(0.0,0.0,1.0);
     sprintf(buf,"Angulo: 'a' & 'd'");
-    renderbitmap(-29,55,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,55,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Controles globais:");
-    renderbitmap(-29,52,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,52,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.7,0.0);
     sprintf(buf,"Velocidade: Slider ou 'y' & 't'");
-    renderbitmap(-29,49,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,49,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.7,0.0);
     sprintf(buf,"Atirar: 'b'");
-    renderbitmap(-29,46,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,46,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Novo Jogo: 'n'");
-    renderbitmap(-29,43,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,43,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"retornar: 'm'");
-    renderbitmap(-29,40,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,40,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Sair: 'q'");
-    renderbitmap(-29,38,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-89,38,GLUT_BITMAP_HELVETICA_12, buf);
 
 }
 
@@ -874,55 +904,99 @@ void elipse()
 }
 
 /// animaÃƒÂ§ÃƒÂ£o de colisÃƒÂ£o com carrinho
-void impacto(float x, float y){
+void impacto(float x, float y, float z){
   int i = -90;
   int c = 0;
 
-  glLoadIdentity();
+  glPushMatrix();
   glColor3f(1,0.8,0);
-  glTranslatef(x,y,0);
-    elipse();
+  glTranslatef(x,y,z);
+  glScaled(1,0.6,1);
+  glutSolidSphere(6,20,20);
+  glPopMatrix();
 
     while(i < 300){
 
     if(c%2 == 0){
-    glLoadIdentity();//////////
+    glPushMatrix(); //////////
     glColor3f(1,0.8,0);
-    glTranslatef(x,y,0);
+    glTranslatef(x,y,z);
     glRotatef(i,0,0,1);
     glTranslatef(0,2,0);
     triangulo();
     glColor3f(1,0,0);
-    glScaled(0.9,0.9,0);
+    glScaled(2,2,2);
     triangulo();
+    glPopMatrix();
+    glPushMatrix(); //////////
+    glColor3f(1,0.8,0);
+    glTranslatef(x,y,z);
+    glRotatef(0,i,0,1);
+    glTranslatef(0,2,0);
+    triangulo();
+    glColor3f(1,0,0);
+    glScaled(2,2,2);
+    triangulo();
+    glPopMatrix();
+    glPushMatrix(); //////////
+    glColor3f(1,0.8,0);
+    glTranslatef(x,y,z);
+    glRotatef(0,0,i,1);
+    glTranslatef(0,2,0);
+    triangulo();
+    glColor3f(1,0,0);
+    glScaled(2,2,2);
+    triangulo();
+    glPopMatrix();
     }
     else{
-    glLoadIdentity();//////////
-    glTranslatef(x,y,0);
+    glPushMatrix(); //////////
+    glTranslatef(x,y,z);
     glColor3f(1,0.8,0);
     glRotatef(i+5,0,0,1);
     glTranslatef(0,0.5,0);
     triangulo();
     glColor3f(1,0,0);
-
-    glScaled(0.9,0.9,0);
+    glScaled(2,2,2);
     triangulo();
+    glPopMatrix();
+    glPushMatrix(); //////////
+    glTranslatef(x,y,z);
+    glColor3f(1,0.8,0);
+    glRotatef(0,i+5,0,1);
+    glTranslatef(0,0.5,0);
+    triangulo();
+    glColor3f(1,0,0);
+    glScaled(2,2,2);
+    triangulo();
+    glPopMatrix();
+    glPushMatrix(); //////////
+    glTranslatef(x,y,z);
+    glColor3f(1,0.8,0);
+    glRotatef(0,0,i+5,1);
+    glTranslatef(0,0.5,0);
+    triangulo();
+    glColor3f(1,0,0);
+    glScaled(2,2,2);
+    triangulo();
+    glPopMatrix();
 
     }
     c+=1;
     i = i+20;
     }
 
-    glLoadIdentity();
-    glTranslatef(x,y,0);
+    glPushMatrix();
+    glTranslatef(x,y,z);
     glColor3f(1,0,0);
     glScaled(0.9,0.9,0);
     elipse();
+    glPopMatrix();
 
 
-    glLoadIdentity();
+    glPushMatrix();
     textoboom(1,1,0,x,y);
-
+    glPopMatrix();
 }
 
 /// carrinho 1
@@ -1117,7 +1191,7 @@ void chao(){
   glTranslatef(0,0,175);
   faixas();
   glPopMatrix();
-  
+
 }
 void teto(){
   glColor3fv(azul_ceu);
@@ -1289,61 +1363,63 @@ void menuBox(){
   glPopMatrix();
 }
 
-void espaco1(){///// mapeia possiveis posiÃƒÂ§ÃƒÂµes para carrinhos
 
+void tamanhoPredio()
+{
+  for(int i = 0; i < 4; i++)
+  {
+    int ind = rand() % 10;
+    tamPredio[i] = 10 *  ind + 10;
+  }
+}
+
+void espaco1(){///// mapeia possiveis posiÃƒÂ§ÃƒÂµes para carrinhos
+  tamanhoPredio();
    /*
   Pontos de Spawn carrinho
-          0,70,0
-         -60,70,0
-          30,70,0
-          37,70,50
-          20,70,80
-         -67,70,95
-         -40,70,125
-          20,70,115
-         -97,70,95
-         -80,70,-15  */
+  */
+
   vetPCarM1[0][0] = 0;
-  vetPCarM1[0][1] = 70;
+  vetPCarM1[0][1] = 1 * tamPredio[3];
   vetPCarM1[0][2] = 0;
 
-  vetPCarM1[1][0] = -60;
-  vetPCarM1[1][1] = 70;
+  vetPCarM1[1][0] = 30;
+  vetPCarM1[1][1] = 1 * tamPredio[3];
   vetPCarM1[1][2] = 0;
 
-  vetPCarM1[2][0] = 30;
-  vetPCarM1[2][1] = 70;
-  vetPCarM1[2][2] = 0;
+  vetPCarM1[2][0] = 37;
+  vetPCarM1[2][1] = 1 * tamPredio[3];
+  vetPCarM1[2][2] = 50;
 
-  vetPCarM1[3][0] = 37;
-  vetPCarM1[3][1] = 70;
-  vetPCarM1[3][2] = 50;
+  vetPCarM1[3][0] = -60;
+  vetPCarM1[3][1] = 1 * tamPredio[2];
+  vetPCarM1[3][2] = 0;
+
 
   vetPCarM1[4][0] = 20;
-  vetPCarM1[4][1] = 70;
+  vetPCarM1[4][1] = 1 * tamPredio[0];
   vetPCarM1[4][2] = 80;
 
   vetPCarM1[5][0] = -67;
-  vetPCarM1[5][1] = 70;
+  vetPCarM1[5][1] = 1 * tamPredio[1];
   vetPCarM1[5][2] = 95;
 
   vetPCarM1[6][0] = -40;
-  vetPCarM1[6][1] = 70;
+  vetPCarM1[6][1] = 1 * tamPredio[0];
   vetPCarM1[6][2] = 125;
 
   vetPCarM1[7][0] = 20;
-  vetPCarM1[7][1] = 70;
+  vetPCarM1[7][1] = 1 * tamPredio[0];
   vetPCarM1[7][2] = 115;
 
   vetPCarM1[8][0] = -97;
-  vetPCarM1[8][1] = 70;
+  vetPCarM1[8][1] = 1 * tamPredio[1];
   vetPCarM1[8][2] = 95;
 
   vetPCarM1[9][0] = -80;
-  vetPCarM1[9][1] = 70;
+  vetPCarM1[9][1] = 1 * tamPredio[2];
   vetPCarM1[9][2] = -15;
 }
-
 
 void spawnCar2(){
   srand( (unsigned)time(NULL) );
@@ -1371,7 +1447,6 @@ void spawnCar2(){
   atualPcar2[1] = vetPCarM1[C2][1];
   atualPcar2[2] = vetPCarM1[C2][2];
 
-
   PColisao1[0] = vetPCarM1[C1][0];
   PColisao1[1] = vetPCarM1[C1][1];
   PColisao1[2] = vetPCarM1[C1][2];
@@ -1380,21 +1455,13 @@ void spawnCar2(){
   PColisao2[1] = vetPCarM1[C2][1];
   PColisao2[2] = vetPCarM1[C2][2];
 
-
   glutPostRedisplay();
 }
 
 void balisticaBomba2();
+
 void transformacao(){
-  glPushMatrix();
-  textoVelo();
-  glPopMatrix();
-  glPushMatrix();
-  textoPonto();
-  glPopMatrix();
-  glPushMatrix();
-  texto();
-  glPopMatrix();
+
 
   if(!posicao && !colisao || novoJogo && !colisao){ // sorteia posiÃƒÂ§ÃƒÂ£o para os carros e novo mapa
     spawnCar2();
@@ -1411,19 +1478,69 @@ void transformacao(){
     novoJogo = true;
   }
 
+
   glRotatef(Rcam_xat,0,0,1);
   glRotatef(Rcam_yat,0,1,0);
   glRotatef(Rcam_zat,1,0,0);
   glTranslatef(Cam_xat,Cam_yat,Cam_zat);
-  
+
+
   glPushMatrix();
   glTranslatef(-30,0,35);
+  glPushMatrix();
+    glTranslated(-198,20,0);
+  glPushMatrix();
+  textoVelo();
+  glPopMatrix();
+  glPushMatrix();
+  textoPonto();
+  glPopMatrix();
+  glPushMatrix();
+  texto();
+  glPopMatrix();
+  glPopMatrix();
   Ceu(200,200);
   glRotatef(90,0,1,0);
+  glPushMatrix();
+    glTranslated(-198,20,0);
+  glPushMatrix();
+  textoVelo();
+  glPopMatrix();
+  glPushMatrix();
+  textoPonto();
+  glPopMatrix();
+  glPushMatrix();
+  texto();
+  glPopMatrix();
+  glPopMatrix();
   Ceu(200,200);
   glRotatef(90,0,1,0);
+  glPushMatrix();
+    glTranslated(-198,20,0);
+  glPushMatrix();
+  textoVelo();
+  glPopMatrix();
+  glPushMatrix();
+  textoPonto();
+  glPopMatrix();
+  glPushMatrix();
+  texto();
+  glPopMatrix();
+  glPopMatrix();
   Ceu(200,200);
   glRotatef(90,0,1,0);
+  glPushMatrix();
+    glTranslated(-198,20,0);
+  glPushMatrix();
+  textoVelo();
+  glPopMatrix();
+  glPushMatrix();
+  textoPonto();
+  glPopMatrix();
+  glPushMatrix();
+  texto();
+  glPopMatrix();
+  glPopMatrix();
   Ceu(200,200);
   glTranslatef(0,200,0);
   teto();
@@ -1441,12 +1558,12 @@ void transformacao(){
   esboco();
   glPopMatrix();
 
-
   glPushMatrix();
   glTranslatef(atualPcar1[0], atualPcar1[1], atualPcar1[2]);
   tank_Vermelho();
 
   glPopMatrix();
+
 
   glPushMatrix();
   glTranslatef(atualPcar2[0], atualPcar2[1], atualPcar2[2]);
@@ -1458,7 +1575,7 @@ void transformacao(){
     glPushMatrix();
 
     //glRotatef(RotyC1,0,1,0);
-    glTranslatef(atualPcar1[0],atualPcar1[1],atualPcar1[2]); // traço da trajetoria do tiro para joagdor 1
+    glTranslatef(atualPcar1[0] ,atualPcar1[1] ,atualPcar1[2]); // traço da trajetoria do tiro para joagdor 1
     trajetoria(teta_tankVermelho,V01);
     glPopMatrix();
     glutPostRedisplay();
@@ -1476,12 +1593,48 @@ void transformacao(){
   {
     glPushMatrix();
 
-      //glTranslatef(atualPcar1[0],atualPcar1[1],atualPcar1[2]);
       balisticaBomba();
-      //trajetoriaBalistica();
+
     glPopMatrix();
   }
-  
+
+
+  if(colisao){
+    if(jogada == 1){
+      glPushMatrix();
+
+      impacto(atualPcar2[0],atualPcar2[1],atualPcar2[2]);
+      glPopMatrix();
+
+      glutPostRedisplay();
+      if(tcolisao < 50){
+        tcolisao += 1;
+      }
+      else{
+        tcolisao = 0;
+        colisao = false;
+        posicao=false;
+      }
+
+    }
+  else{
+    glPushMatrix();
+
+    impacto(atualPcar1[0],atualPcar1[1],atualPcar1[2]);
+    glPopMatrix();
+
+    glutPostRedisplay();
+      if(tcolisao < 50){
+        tcolisao += 1;
+      }
+      else{
+        tcolisao = 0;
+        colisao = false;
+        posicao=false;
+      }
+
+  }
+  }
 
 }
 
@@ -1500,121 +1653,117 @@ static void balisticaBomba()
   float delta_espaco_Y = V0y * delta_tempo - g * delta_tempo * delta_tempo / 2;
   float delta_espaco_Z = V0x * delta_tempo;
 
-  translateX = X_bomba + delta_espaco_X;// +  atualPcar1[0]; /// posiciona objetos para jogador 1
-  translateY = Y_bomba + delta_espaco_Y;// +  atualPcar1[1];
+  translateX = X_bomba + delta_espaco_X + trajeX;// +  atualPcar1[0]; /// posiciona objetos para jogador 1
+  translateY = Y_bomba + delta_espaco_Y + trajeY;// +  atualPcar1[1];
 
   glColor3f(0.0,0.0,0.0);
   glPushMatrix();
   if(jogada == 0)
   {
-    glTranslatef(atualPcar1[0] ,atualPcar1[1] ,atualPcar1[2]);
+    glTranslatef(atualPcar1[0],atualPcar1[1] ,atualPcar1[2]);
+     glRotatef(RotyC1,0,1,0);
   }
   else{
     glTranslatef(atualPcar2[0] ,atualPcar2[1] ,atualPcar2[2]);
+    glRotatef(RotyC2,0,1,0);
   }
 
-  if(jogada == 0){
-      glRotatef(RotyC1,0,1,0);
-    }else{
-      glRotatef(RotyC2,0,1,0);
-    }
+  glTranslatef(translateX , translateY , translateZ);
 
-  glTranslatef(translateX + trajeX , translateY + trajeY, translateZ);
-
-  glScaled(0.5, 0.5, 0.5);
-  Bomba();
-  glScaled(1/0.5, 1/0.5, 1.0/0.5);
+    glPushMatrix();
+      glScaled(1.0, 1.0, 1.0);
+      Bomba();
+    glPopMatrix();
 
   glPopMatrix();
 
-  if(delta_tempo > 10)
+  if(delta_tempo > 20)
   {
     printf("tempo esgotado\n" );
     bomba = false;
     delta_tempo = 0;
     mudarJogador = true;
-    if(jogada == 0)
+    printf("%f\n", PColisao2[0] );
+    printf("%f\n", PColisao2[1] );
+    printf("%f\n", PColisao2[2 ] );
+  }
+
+  if(jogada == 0)
+  {
+
+    float transX = atualPcar1[0] + translateX * cos(1.0 * RotyC1/180.0 * PI);
+    float transY = atualPcar1[1] + translateY;
+    float transZ = atualPcar1[2] + translateX * -1.0 * sin(1.0 * RotyC1/180.0 * PI);
+
+    glPushMatrix();
+
+    glTranslatef(transX, transY, transZ);
+      glScaled(1.0, 1.0, 1.0);
+      glColor3f(1.0, 0.0, 0.2);
+      Bomba();
+    glPopMatrix();
+
+
+    printf("transX %f\n", transX );
+    printf("transY %f\n", transY );
+    printf("transZ %f\n", transZ );
+
+    if(transX > PColisao2[0] - limitex && transX < PColisao2[0] + limitex)
     {
-      jogada = 1;
+      if(transY > PColisao2[1] - limitey && transY < PColisao2[1] + limitey)
+      {
+        if(transZ > PColisao2[2] - limitez && transZ < PColisao2[2] + limitez)
+        {
+          printf("Colisao\n" );
+          printf("Colisao\n" );
+          printf("Colisao\n" );
+          colisao = true;
+          printf("tempo esgotado\n" );
+          bomba = false;
+          delta_tempo = 0;
+          mudarJogador = true;
+          jogada = 1;
+        }
+      }
     }
-    else
+  }else{
+    float transX = atualPcar2[0] + translateX * cos(1.0 * RotyC2/180.0 * PI);
+    float transY = atualPcar2[1] + translateY;
+    float transZ = atualPcar2[2] + translateX * -1.0 * sin(1.0 * RotyC2/180.0 * PI);
+
+    glPushMatrix();
+
+    glTranslatef(transX, transY, transZ);
+      glScaled(1.0, 1.0, 1.0);
+      glColor3f(1.0, 0.0, 0.2);
+      Bomba();
+    glPopMatrix();
+
+    printf("transX %f\n", transX );
+    printf("transY %f\n", transY );
+    printf("transZ %f\n", transZ );
+
+    if(transX > PColisao1[0] - limitex && transX < PColisao1[0] + limitex)
     {
-      jogada = 0;
+      if(transY > PColisao1[1] - limitey && transY < PColisao1[1] + limitey)
+      {
+        if(transZ > PColisao1[2] - limitez && transZ < PColisao1[2] + limitez)
+        {
+          printf("Colisao\n" );
+          printf("Colisao\n" );
+          printf("Colisao\n" );
+          colisao = true;
+          printf("tempo esgotado\n" );
+          bomba = false;
+          delta_tempo = 0;
+          mudarJogador = true;
+          jogada = 0;
+        }
+      }
     }
   }
   glutTimerFunc(200, redisplay, X_bomba);
-  /*if(translateY <= 0){
-    bomba = false;
-    delta_tempo = 0;
-    if(jogada == 0){
-      jogada =1;
-    }else{
-      jogada =0;
-    }
-  }*/
-/*
-  if(jogada == 0){
-      translateX = X_bomba + delta_espaco_X; //+ ( atualPcar1[0]); /// posiciona objetos para jogador 1
-      translateY = Y_bomba + delta_espaco_Y;// + ( atualPcar1[1]);
 
-
-      if(translateX > PColisao2[0] - tx/2 && translateX < PColisao2[0] + tx/2 // trata colisão com jogador 2
-        && translateY > PColisao2[1] &&  translateY < PColisao2[1] + ty+3.5){
-
-      colisao = true;
-
-
-      bomba = false;
-      delta_tempo = 0;
-
-        jogada = 1;
-        pontoJ1 += 1;
-        posicao = false;
-
-      glutPostRedisplay();
-    }else{
-
-        glColor3f(0.0,0.0,0.0);
-        glTranslatef(translateX, translateY, 0.0);
-        glScaled(0.5, 0.5, 0.0);
-        Bomba();
-        glScaled(1/0.5, 1/0.5, 0.0);
-        glutTimerFunc(30, redisplay, X_bomba);
-    }
-  }else{
-        translateX = X_bomba + delta_espaco_X + ( atualPcar2[0]+0.4);////// posiciona objetos para jogador 2
-        translateY = Y_bomba + delta_espaco_Y + (3.7+atualPcar2[1]);
-
-        if(translateX > PColisao1[0] - tx/2 && translateX < PColisao1[0] + tx/2 //// trata colisão com jgador 1
-        && translateY > PColisao1[1] && translateY < PColisao1[1] + ty+3.5){
-
-        colisao = true;
-
-
-        bomba = false;
-        delta_tempo = 0;
-
-        jogada = 0;
-
-        pontoJ2 += 1;
-        posicao = false;
-
-        glutPostRedisplay();
-      }else{
-        glLoadIdentity();
-        glColor3f(0.0,0.0,0.0);
-        glTranslatef(translateX, translateY, translateZ);
-        glScaled(0.5, 0.5, 0.0);
-        Bomba();
-        glScaled(1/0.5, 1/0.5, 0.0);
-        glutTimerFunc(30, redisplay, X_bomba);
-      }
-
-      printf("translateX: %f\n",translateX );
-      printf("translateY: %f\n", translateY);
-
-    }
-    */
 }
 void trajetoria(float teta,float V0)
 {
@@ -1636,10 +1785,10 @@ void trajetoria(float teta,float V0)
     }
 
   glBegin(GL_LINE_STRIP);
-  while(temp <= 1* (V0y * 2 / g))
+  while(temp <= 4* (V0y * 2 / g))
   {
 
-    glVertex3f(trajeX + V0x * temp , trajeY + V0y * temp - g * temp * temp /2.0,0);
+    glVertex3f( V0x * temp + trajeX,  trajeY + V0y * temp - g * temp * temp /2.0,0);
     temp += 0.1;
   }
   glEnd();
@@ -1678,14 +1827,14 @@ void Atualiza_desenho(void){
     glLoadIdentity();
     gluLookAt(
         x,      y,      z,
-        x + lx, 1.0 + ly, z + lz,
+        x + lx, y + ly, z + lz,
         0.0,    1.0,    0.0);
     transformacao();
 
     glutSwapBuffers();
 }
 
-void Teclado( unsigned char tecla, int x, int y){
+void Teclado( unsigned char tecla, int a, int b){
     switch (tecla){
       case 27 :
       case 'q':
@@ -1695,27 +1844,27 @@ void Teclado( unsigned char tecla, int x, int y){
           exit(0);
         break;
       case 'i':
-    if (RotC1 < 45 && !bomba)
+    if (!bomba)
     {
       RotC1 += 1;
 
       teta_tankVermelho = RotC1 ;
 
-       
+
     }
     break;
     case 'k':
 
-    if (RotC1 > 0 && !bomba)
+    if (!bomba)
     {
       RotC1 -= 1;
       teta_tankVermelho = RotC1;
 
-      
+
     }
     break;
     case 'j':
-    if (RotyC1 < 180 && !bomba)
+    if ( !bomba)
     {
       RotyC1 += 1;
       if(Cam ==2 && jogada == 0){
@@ -1724,12 +1873,12 @@ void Teclado( unsigned char tecla, int x, int y){
 
           }
 
-      
+
     }
     break;
   case 'l':
 
-    if (RotyC1 > -180 && !bomba)
+    if ( !bomba)
     {
       RotyC1 -= 1;
       if(Cam ==2 && jogada == 0){
@@ -1738,19 +1887,19 @@ void Teclado( unsigned char tecla, int x, int y){
 
           }
 
-   
+
     }
     break;
   case 'w':
-    if (RotC2 > -45 && !bomba)
+    if ( !bomba)
     {
       RotC2 -= 1;
      teta_tankAzul = -RotC2;
-     
+
     }
     break;
   case 's':
-    if (RotC2 < 0 && !bomba)
+    if (!bomba)
     {
       RotC2 += 1;
       teta_tankAzul = -RotC2;
@@ -1758,25 +1907,25 @@ void Teclado( unsigned char tecla, int x, int y){
     }
     break;
     case 'd':
-    if (RotyC2 > -180 && !bomba)
+    if ( !bomba)
     {
       RotyC2 -= 1;
       if(Cam ==3 && jogada == 1){
-            
-            Rcam_yat=RotyC2;
-          
+
+            Rcam_yat=-RotyC2;
+
           }
 
     }
     break;
     case 'a':
-    if (RotyC2 < 180 && !bomba)
+    if (  !bomba)
     {
       RotyC2 += 1;
       if(Cam ==3 && jogada == 1){
-            
-            Rcam_yat=RotyC2;
-          
+
+            Rcam_yat=-RotyC2;
+
           }
     }
     break;
@@ -1906,6 +2055,11 @@ void Teclado( unsigned char tecla, int x, int y){
        Rcam_zat-=1.0;
       break;
 
+    case 'v':
+      y += 0.5;
+      printf("y: %f\n", y );
+      break;
+
     }
 }
 
@@ -1919,31 +2073,7 @@ void camera(void){
     //y += deltaMove * ly * 0.1;
   }
 
-  /*if(mudarJogador)
-  {
-    printf("mudarJogador\n" );
-    if(jogada == 1)
-    {
-      lx =  atualPcar2[0] - x;
 
-      //ly = atualPcar2[1] - y;
-
-      lz = atualPcar2[2] - z;
-    }
-
-    else {
-      lx = x - atualPcar1[0];
-
-      //ly = atualPcar1[1] - y;
-
-      lz = z - atualPcar1[2];
-    }
-
-    angle = 0.0;
-    deltaAngle = 0.0;
-
-    mudarJogador = false;
-  }*/
 
   glutPostRedisplay();
   //printf("eyex: %f\n eyey: %f\n eyez: %f\n lookx: %f\n looky: %f\n lookz: %f\n", eyex,eyey,eyez,lookx,looky,lookz);
