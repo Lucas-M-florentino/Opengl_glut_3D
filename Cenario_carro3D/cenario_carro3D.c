@@ -731,19 +731,6 @@ void quarteiroes()
 void esboco()
 {
 
-      /*glPushMatrix();
-        glTranslatef(vetPCarM1[8][0], 70, vetPCarM1[8][2]);
-        glScaled(5,1.0,5  );
-        circulo();
-      glPopMatrix();
-
-    glPushMatrix();
-      glTranslatef(vetPCarM1[9][0], 70, vetPCarM1[9][2]);
-      glScaled(10,1.0,10    );
-      circulo();
-    glPopMatrix();*/
-
-
     glScalef(50, 1.0, 50);//////////    tamanho predio x50, y70, z50
       glPushMatrix();
 
@@ -1609,6 +1596,7 @@ void transformacao(){
 
   if(colisao){
     if(jogada == 1){
+
       glPushMatrix();
 
       impacto(atualPcar2[0],atualPcar2[1],atualPcar2[2]);
@@ -1730,7 +1718,16 @@ static void balisticaBomba()
           bomba = false;
           delta_tempo = 0;
           mudarJogador = true;
+
           jogada = 1;
+          if(pontoJ1 == 3){
+            pontoJ1 == 0;
+            pontoJ2 == 0;
+        }else if(pontoJ2 == 3){
+            pontoJ1 == 0;
+            pontoJ2 == 0;
+        }else{
+        pontoJ1++;}
         }
       }
     }
@@ -1766,6 +1763,16 @@ static void balisticaBomba()
           delta_tempo = 0;
           mudarJogador = true;
           jogada = 0;
+          if(pontoJ1 == 3){
+            pontoJ1 == 0;
+            pontoJ2 == 0;
+        }else if(pontoJ2 == 3){
+            pontoJ1 == 0;
+            pontoJ2 == 0;
+        }else{
+            pontoJ2++;
+            }
+
         }
       }
     }
