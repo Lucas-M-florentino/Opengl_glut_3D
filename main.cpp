@@ -103,6 +103,7 @@ int main(int argc, char *argv[]){
 	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glutMainLoop();
-    return 0;
+
+    return (0);
 }
 
