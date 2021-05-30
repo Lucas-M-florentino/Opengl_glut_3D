@@ -122,6 +122,8 @@ float deltaAngle = 0.0; // additional angle change when dragging
 int isDragging = 0; // true when dragging
 int xDragStart = 0; // records the x-coordinate when dragging starts
 
+int window01, window02;
+
 int tamPredio[4] = {50, 70, 55, 80};
 
 void desenha(float p1[3],float p2[3],float p3[3],float p4[3]){
@@ -760,19 +762,22 @@ void renderbitmap(float x, float y, void *font, char *string)
         glutBitmapCharacter(font, *c);
     }
 }
+
 ///// texto de angulo de canhao
 void texto()
 {
     char buf[100] = {0};
     glColor3f(1.0,0.0,1.0);
-    glTranslated(0,0,-50);
-    sprintf(buf,"(Jogador 1) Angulo: %d", teta_tankVermelho);
-    renderbitmap(50,73,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo Y: %d", teta_tankVermelho);
+    renderbitmap(-30,16,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo XZ: %d", RotyC1);
+    renderbitmap(-30,13,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,1.0,1.0);
-    glTranslated(0,0,50);
-    sprintf(buf,"(Jogador 2) Angulo: %d",-teta_tankAzul + 180);
-    renderbitmap(50,73,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo Y: %d",-teta_tankAzul + 180);
+    renderbitmap(0,16,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo XZ: %d", RotyC2);
+    renderbitmap(-0,13,GLUT_BITMAP_HELVETICA_12, buf);
 }
 //// texto de velocidade slider e botoes
 void textoVelo()
@@ -780,16 +785,16 @@ void textoVelo()
     char buf[100] = {0};
     glColor3f(1.0,0.0,1.0);
     sprintf(buf,"Velocidade 1: %d", V01);
-    renderbitmap(-89,73,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-30,10,GLUT_BITMAP_HELVETICA_12, buf);
 
     glLoadIdentity();
     glColor3f(0.0,1.0,1.0);
     sprintf(buf,"Velocidade 2: %d", V02);
-    renderbitmap(81,73,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(0,10,GLUT_BITMAP_HELVETICA_12, buf);
 
-    glColor3f(0.0,0.0,0.0);
+    /*glColor3f(0.0,0.0,0.0);
     sprintf(buf,"pressione 'm' menu");
-    renderbitmap(-89,64,GLUT_BITMAP_HELVETICA_18, buf);
+    renderbitmap(-8,10,GLUT_BITMAP_HELVETICA_18, buf);*/
 
 }
 /// texto exibido no menu
@@ -797,49 +802,51 @@ void textoBotoes()
 {
     char buf[100] = {0};
     glColor3f(0.0,0.0,0.0);
-    sprintf(buf,"MENU");
-    renderbitmap(-88,66,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Controles");
+    renderbitmap(-5,5,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(1.0,0.0,0.0);
     sprintf(buf,"Jogador 1:");
-    renderbitmap(-89,63,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-25,-0,GLUT_BITMAP_HELVETICA_12, buf);
 
-
-    sprintf(buf,"Angulo: 'j' & 'l'");
-    renderbitmap(-89,61,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo Y: 'i' & 'k'");
+    renderbitmap(-25,-3,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo XZ: 'j' & 'l'");
+    renderbitmap(-25,-6,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,1.0);
     sprintf(buf,"Jogador 2:");
-    renderbitmap(-89,58,GLUT_BITMAP_HELVETICA_12, buf);
-
+    renderbitmap(10,-0,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,1.0);
-    sprintf(buf,"Angulo: 'a' & 'd'");
-    renderbitmap(-89,55,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo Y: 'w' & 's'");
+    renderbitmap(8,-3,GLUT_BITMAP_HELVETICA_12, buf);
+    sprintf(buf,"Angulo XZ: 'a' & 'd'");
+    renderbitmap(8,-6,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Controles globais:");
-    renderbitmap(-89,52,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-8,-9,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.7,0.0);
     sprintf(buf,"Velocidade: Slider ou 'y' & 't'");
-    renderbitmap(-89,49,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-8,-12,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.7,0.0);
     sprintf(buf,"Atirar: 'b'");
-    renderbitmap(-89,46,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-8,-15,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Novo Jogo: 'n'");
-    renderbitmap(-89,43,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-8,-18,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"retornar: 'm'");
-    renderbitmap(-89,40,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-8,-21,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Sair: 'q'");
-    renderbitmap(-89,38,GLUT_BITMAP_HELVETICA_12, buf);
+    renderbitmap(-8,-24,GLUT_BITMAP_HELVETICA_12, buf);
 
 }
 
@@ -849,25 +856,26 @@ void textoPonto()
     char buf[100] = {0};
     glColor3f(0.0,0.0,0.0);
     sprintf(buf,"Melhor de 3!");
-    renderbitmap(-3,71,GLUT_BITMAP_HELVETICA_12, buf);
-    sprintf(buf,"Score: ");
-    renderbitmap(-2,68,GLUT_BITMAP_HELVETICA_18, buf);
+    renderbitmap(-8,28,GLUT_BITMAP_HELVETICA_12, buf);
+    //sprintf(buf,"Score: ");
+    //renderbitmap(-6,8,GLUT_BITMAP_HELVETICA_18, buf);
 
     glColor3f(0.0,0.0,0.0);
-    sprintf(buf,"Jogador 1: ");
-    renderbitmap(-10,66,GLUT_BITMAP_HELVETICA_18, buf);
+    sprintf(buf,"Jogador 1");
+    renderbitmap(-30,23,GLUT_BITMAP_HELVETICA_18, buf);
     glColor3f(1.0,0.0,1.0);
-    sprintf(buf,"%d",pontoJ1);
-    renderbitmap(-2,66,GLUT_BITMAP_HELVETICA_18, buf);
+    sprintf(buf,"Score: %d",pontoJ1);
+    renderbitmap(-30,19,GLUT_BITMAP_HELVETICA_12, buf);
 
     glColor3f(0.0,0.0,0.0);
-    sprintf(buf,"Jogador 2: ");
-    renderbitmap(0,66,GLUT_BITMAP_HELVETICA_18, buf);
+    sprintf(buf,"Jogador 2");
+    renderbitmap(0,23,GLUT_BITMAP_HELVETICA_18, buf);
     glColor3f(0.0,1.0,1.0);
-    sprintf(buf,"%d",pontoJ2);
-    renderbitmap(8,66,GLUT_BITMAP_HELVETICA_18, buf);
+    sprintf(buf,"Score: %d",pontoJ2);
+    renderbitmap(0,19,GLUT_BITMAP_HELVETICA_12, buf);
 
 }
+
 //// texto de animaÃƒÂ§ÃƒÂ£o para colisÃƒÂ£op carrinho
 void textoboom(float R, float G, float B, float x, float y)
 {
@@ -1469,10 +1477,10 @@ void transformacao(){
   }
 
   glPushMatrix();
-  textoVelo();
+  //textoVelo();
   glPopMatrix();
   if(menu){
-    menuBox();
+    //menuBox();
   }
   if(pontoJ1 == 3 || pontoJ2 == 3){
     novoJogo = true;
@@ -1490,27 +1498,13 @@ void transformacao(){
   glPushMatrix();
     glTranslated(-198,20,0);
   glPushMatrix();
-  textoVelo();
+  //textoVelo();
   glPopMatrix();
   glPushMatrix();
-  textoPonto();
+  //textoPonto();
   glPopMatrix();
   glPushMatrix();
-  texto();
-  glPopMatrix();
-  glPopMatrix();
-  Ceu(200,200);
-  glRotatef(90,0,1,0);
-  glPushMatrix();
-    glTranslated(-198,20,0);
-  glPushMatrix();
-  textoVelo();
-  glPopMatrix();
-  glPushMatrix();
-  textoPonto();
-  glPopMatrix();
-  glPushMatrix();
-  texto();
+  //texto();
   glPopMatrix();
   glPopMatrix();
   Ceu(200,200);
@@ -1518,13 +1512,13 @@ void transformacao(){
   glPushMatrix();
     glTranslated(-198,20,0);
   glPushMatrix();
-  textoVelo();
+  //textoVelo();
   glPopMatrix();
   glPushMatrix();
-  textoPonto();
+  //textoPonto();
   glPopMatrix();
   glPushMatrix();
-  texto();
+  //texto();
   glPopMatrix();
   glPopMatrix();
   Ceu(200,200);
@@ -1532,18 +1526,32 @@ void transformacao(){
   glPushMatrix();
     glTranslated(-198,20,0);
   glPushMatrix();
-  textoVelo();
+  //textoVelo();
   glPopMatrix();
   glPushMatrix();
-  textoPonto();
+  //textoPonto();
   glPopMatrix();
   glPushMatrix();
-  texto();
+  //texto();
+  glPopMatrix();
+  glPopMatrix();
+  Ceu(200,200);
+  glRotatef(90,0,1,0);
+  glPushMatrix();
+    glTranslated(-198,20,0);
+  glPushMatrix();
+  //textoVelo();
+  glPopMatrix();
+  glPushMatrix();
+  //textoPonto();
+  glPopMatrix();
+  glPushMatrix();
+  //texto();
   glPopMatrix();
   glPopMatrix();
   Ceu(200,200);
   glTranslatef(0,200,0);
-  teto();
+  //teto();
   glPopMatrix();
 
   glPushMatrix();
@@ -2061,6 +2069,10 @@ void Teclado( unsigned char tecla, int a, int b){
       break;
 
     }
+
+    glutSetWindow(window02);
+    glutPostRedisplay();
+    glutSetWindow(window01);
 }
 
 
@@ -2122,12 +2134,55 @@ void mouseButton(int button, int state, int x, int y){
 
 }
 
+
+static void reshape_menu(int Janela_width, int Janela_height)
+{
+    glViewport(0,0,Janela_width,Janela_height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-30.0,30.0,-30.0,30.0);
+}
+
+static void sideMenu(void)
+{
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();//inicializa matriz com a matriz identidade
+    glClear(GL_COLOR_BUFFER_BIT);//Limpa janela
+    /*glColor3f(1.0,0.0,0.0);
+    glBegin(GL_LINE_LOOP);
+        glVertex2f(-10.0f,-10.0f);
+        glVertex2f(-10.0f,5.0f);
+        glVertex2f(0.0f,15.0f);
+        glVertex2f(10.0f,5.0f);
+        glVertex2f(10.0f,-10.0f);
+    glEnd();*/
+    textoPonto();
+    texto();
+    textoVelo();
+    textoBotoes();
+
+    glFlush();
+}
+
 int main(int argc, char *argv[]){
   glutInit(&argc,argv);
+
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGB);
   glutInitWindowPosition(20,0);
-  glutInitWindowSize(1480,960);
-  glutCreateWindow("Canhao - 3D");
+  glutInitWindowSize(1000,960);
+   window01 = glutCreateWindow("Canhao - 3D");
+
+  glutInitDisplayMode(GLUT_RGB | GLUT_SINGLE );
+  glutInitWindowPosition(1020,0);
+  glutInitWindowSize(300,300);
+   window02 = glutCreateWindow("Menu");
+
+  glutSetWindow(window02);
+  glutReshapeFunc(reshape_menu);
+  glutDisplayFunc(sideMenu);
+  glClearColor(1,1,1,0);
+
+  glutSetWindow(window01);
   glutReshapeFunc(redimensiona);
   glutDisplayFunc(Atualiza_desenho);
   glutIdleFunc(camera);
@@ -2137,8 +2192,8 @@ int main(int argc, char *argv[]){
   glutSpecialFunc(TeclasEspec);
   glutSpecialUpFunc(releasespecial);
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-
   glEnable(GL_DEPTH_TEST);
+
   glutMainLoop();
     return 0;
 }
