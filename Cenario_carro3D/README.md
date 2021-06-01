@@ -1,10 +1,10 @@
-Jogo de tiro de 2 jogadores
+Jogo de tiro de 2 jogadores em 3 dimensões 
 
 Acadêmicos: Caio Fernandes Lima, Lucas Matheus de Moraes Florentino
 
 Execute os seguintes comandos no terminal linux:
 
-Compile o arquivo: g++ main.c -lGL -lGLU -lglut -lm -o batalha
+Compile o arquivo: g++ cenario_carro3D.c -lGL -lGLU -lglut -lm -o batalha
 
 Execute o arquivo: ./batalha
 
